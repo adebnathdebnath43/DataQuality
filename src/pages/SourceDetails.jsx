@@ -11,6 +11,7 @@ const SourceDetails = () => {
     const [items, setItems] = useState([]); // Items in current path
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
+    const [selectedItems, setSelectedItems] = useState(new Set());
 
     // Mock file system - simplified to avoid recursion issues
     const [fileSystem, setFileSystem] = useState({});
@@ -72,6 +73,7 @@ const SourceDetails = () => {
             }
         }
         setItems(currentItems || []);
+        setSelectedItems(new Set()); // Clear selection on navigation
     }, [currentPath, fileSystem]);
 
     const handleNavigate = (folderName) => {
@@ -86,7 +88,27 @@ const SourceDetails = () => {
         }
     };
 
+    const toggleSelectAll = () => {
+        if (selectedItems.size === items.length) {
+            setSelectedItems(new Set());
+        } else {
+            setSelectedItems(new Set(items.map(item => item.id)));
+        }
+    };
+
+    const toggleSelectItem = (itemId) => {
+        const newSelected = new Set(selectedItems);
+        if (newSelected.has(itemId)) {
+            newSelected.delete(itemId);
+        } else {
+            newSelected.add(itemId);
+        }
+        setSelectedItems(newSelected);
+    };
+
     const handleScan = () => {
+        if (selectedItems.size === 0) return;
+
         setIsScanning(true);
         setScanProgress(0);
 
@@ -133,11 +155,12 @@ const SourceDetails = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <Link to={`/connect/${source.id}`}>
-                        <Button variant="outline">Configuration</Button>
-                    </Link>
-                    <Button variant="primary" onClick={handleScan} disabled={isScanning}>
-                        {isScanning ? `Scanning ${scanProgress}%` : 'Scan Now'}
+                    <Button
+                        variant="primary"
+                        onClick={handleScan}
+                        disabled={isScanning || selectedItems.size === 0}
+                    >
+                        {isScanning ? `Checking ${scanProgress}%` : 'Run Quality Check'}
                     </Button>
                 </div>
             </div>
@@ -173,6 +196,14 @@ const SourceDetails = () => {
                         <table className="data-table">
                             <thead>
                                 <tr>
+                                    <th className="checkbox-col">
+                                        <input
+                                            type="checkbox"
+                                            checked={items.length > 0 && selectedItems.size === items.length}
+                                            onChange={toggleSelectAll}
+                                            className="custom-checkbox"
+                                        />
+                                    </th>
                                     <th>Name</th>
                                     <th>Size</th>
                                     <th>Type</th>
@@ -183,7 +214,19 @@ const SourceDetails = () => {
                             </thead>
                             <tbody>
                                 {items && items.length > 0 ? items.map(item => (
-                                    <tr key={item.id} className={item.type === 'FOLDER' ? 'folder-row' : ''} onClick={() => item.type === 'FOLDER' && handleNavigate(item.name)}>
+                                    <tr
+                                        key={item.id}
+                                        className={`${item.type === 'FOLDER' ? 'folder-row' : ''} ${selectedItems.has(item.id) ? 'selected-row' : ''}`}
+                                        onClick={() => item.type === 'FOLDER' && handleNavigate(item.name)}
+                                    >
+                                        <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.has(item.id)}
+                                                onChange={() => toggleSelectItem(item.id)}
+                                                className="custom-checkbox"
+                                            />
+                                        </td>
                                         <td>
                                             <div className="file-name">
                                                 <span className="file-icon">{item.type === 'FOLDER' ? '📁' : '📄'}</span>
@@ -206,7 +249,7 @@ const SourceDetails = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                             Empty folder
                                         </td>
                                     </tr>
