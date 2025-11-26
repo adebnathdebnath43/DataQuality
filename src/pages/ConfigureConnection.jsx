@@ -20,21 +20,21 @@ const ConfigureConnection = () => {
     const getFields = () => {
         if (sourceId === 'aws') {
             const commonFields = [
-                { name: 'bucket', label: 'Bucket Name', type: 'text' },
-                { name: 'region', label: 'Region', type: 'text', placeholder: 'us-east-1' },
+                { name: 'bucket', label: 'Bucket Name', type: 'text', required: true },
+                { name: 'region', label: 'Region', type: 'text', placeholder: 'us-east-1', required: true },
             ];
 
             if (authMethod === 'keys') {
                 return [
                     ...commonFields,
-                    { name: 'accessKey', label: 'Access Key ID', type: 'text' },
-                    { name: 'secretKey', label: 'Secret Access Key', type: 'password' },
+                    { name: 'accessKey', label: 'Access Key ID', type: 'text', required: true },
+                    { name: 'secretKey', label: 'Secret Access Key', type: 'password', required: true },
                 ];
             } else if (authMethod === 'assume_role') {
                 return [
                     ...commonFields,
-                    { name: 'roleArn', label: 'Role ARN', type: 'text', placeholder: 'arn:aws:iam::123456789012:role/MyRole' },
-                    { name: 'externalId', label: 'External ID (Optional)', type: 'text' },
+                    { name: 'roleArn', label: 'Role ARN', type: 'text', placeholder: 'arn:aws:iam::123456789012:role/MyRole', required: true },
+                    { name: 'externalId', label: 'External ID (Optional)', type: 'text', required: false },
                 ];
             }
             // 'iam' - no extra fields
@@ -44,24 +44,24 @@ const ConfigureConnection = () => {
         // Return default fields for other sources
         const sourceConfig = {
             snowflake: [
-                { name: 'account', label: 'Account URL', type: 'text', placeholder: 'xy12345.snowflakecomputing.com' },
-                { name: 'username', label: 'Username', type: 'text' },
-                { name: 'password', label: 'Password', type: 'password' },
-                { name: 'warehouse', label: 'Warehouse', type: 'text' },
-                { name: 'database', label: 'Database', type: 'text' },
-                { name: 'schema', label: 'Schema', type: 'text' },
+                { name: 'account', label: 'Account URL', type: 'text', placeholder: 'xy12345.snowflakecomputing.com', required: true },
+                { name: 'username', label: 'Username', type: 'text', required: true },
+                { name: 'password', label: 'Password', type: 'password', required: true },
+                { name: 'warehouse', label: 'Warehouse', type: 'text', required: true },
+                { name: 'database', label: 'Database', type: 'text', required: true },
+                { name: 'schema', label: 'Schema', type: 'text', required: true },
             ],
             postgres: [
-                { name: 'host', label: 'Host', type: 'text', placeholder: 'db.example.com' },
-                { name: 'port', label: 'Port', type: 'number', placeholder: '5432' },
-                { name: 'database', label: 'Database Name', type: 'text' },
-                { name: 'username', label: 'Username', type: 'text' },
-                { name: 'password', label: 'Password', type: 'password' },
+                { name: 'host', label: 'Host', type: 'text', placeholder: 'db.example.com', required: true },
+                { name: 'port', label: 'Port', type: 'number', placeholder: '5432', required: true },
+                { name: 'database', label: 'Database Name', type: 'text', required: true },
+                { name: 'username', label: 'Username', type: 'text', required: true },
+                { name: 'password', label: 'Password', type: 'password', required: true },
             ],
             default: [
-                { name: 'connectionString', label: 'Connection String', type: 'text' },
-                { name: 'username', label: 'Username', type: 'text' },
-                { name: 'password', label: 'Password', type: 'password' },
+                { name: 'connectionString', label: 'Connection String', type: 'text', required: true },
+                { name: 'username', label: 'Username', type: 'text', required: true },
+                { name: 'password', label: 'Password', type: 'password', required: true },
             ]
         };
         return sourceConfig[sourceId] || sourceConfig.default;
@@ -86,10 +86,29 @@ const ConfigureConnection = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Connecting to', sourceId, { ...formData, authMethod: sourceId === 'aws' ? authMethod : undefined });
+        const connectionData = {
+            id: Date.now().toString(),
+            sourceId,
+            sourceName: sourceDetails.name,
+            icon: sourceDetails.icon,
+            connectedAt: new Date().toISOString(),
+            ...formData,
+            authMethod: sourceId === 'aws' ? authMethod : undefined
+        };
+
+        // Simulate saving to backend (LocalStorage)
+        const existing = JSON.parse(localStorage.getItem('connectedSources') || '[]');
+        localStorage.setItem('connectedSources', JSON.stringify([connectionData, ...existing]));
+
+        console.log('Connected:', connectionData);
+
+        // Show loading state (simulated)
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = 'Connecting...';
+
         setTimeout(() => {
             navigate('/');
-        }, 1000);
+        }, 1500);
     };
 
     return (
@@ -147,7 +166,7 @@ const ConfigureConnection = () => {
                                 placeholder={field.placeholder}
                                 onChange={handleChange}
                                 className="form-input"
-                                required={authMethod !== 'iam' || (field.name !== 'accessKey' && field.name !== 'secretKey')}
+                                required={field.required}
                             />
                         </div>
                     ))}

@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import ConnectSource from './pages/ConnectSource';
 import ConfigureConnection from './pages/ConfigureConnection';
+import SourceDetails from './pages/SourceDetails';
 import './App.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="connect" element={<ConnectSource />} />
           <Route path="connect/:sourceId" element={<ConfigureConnection />} />
+          <Route path="source/:id" element={<SourceDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>

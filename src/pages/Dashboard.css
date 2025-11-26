@@ -110,3 +110,14 @@
         transform: translateY(0);
     }
 }
+
+.source-card-interactive {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.source-card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    border-color: var(--text-accent);
+}
