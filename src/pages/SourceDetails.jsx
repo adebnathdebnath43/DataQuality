@@ -2,79 +2,93 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import { listFiles } from '../services/api';
 import './SourceDetails.css';
 
 const SourceDetails = () => {
     const { id } = useParams();
     const [source, setSource] = useState(null);
-    const [currentPath, setCurrentPath] = useState([]); // Array of folder names
-    const [items, setItems] = useState([]); // Items in current path
+    const [currentPath, setCurrentPath] = useState([]);
+    const [items, setItems] = useState([]);
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState(0);
     const [selectedItems, setSelectedItems] = useState(new Set());
-
-    // Mock file system - simplified to avoid recursion issues
-    const [fileSystem, setFileSystem] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [models, setModels] = useState([]);
+    const [selectedModel, setSelectedModel] = useState('');
 
     useEffect(() => {
         const sources = JSON.parse(localStorage.getItem('connectedSources') || '[]');
-        // Loose equality for ID matching
         const foundSource = sources.find(s => s.id == id);
 
         if (foundSource) {
             setSource(foundSource);
-
-            // Generate safe mock data only once
-            if (Object.keys(fileSystem).length === 0) {
-                const mockData = {
-                    root: [
-                        {
-                            id: 'f1', name: 'raw_data', type: 'FOLDER', size: '-', lastModified: '11/26/2025', status: '-', children: [
-                                {
-                                    id: 'f1_1', name: 'logs', type: 'FOLDER', size: '-', lastModified: '11/25/2025', status: '-', children: [
-                                        { id: 'f1_1_1', name: 'app.log', type: 'LOG', size: '12 MB', lastModified: '11/25/2025', status: 'success' },
-                                        { id: 'f1_1_2', name: 'error.log', type: 'LOG', size: '45 MB', lastModified: '11/25/2025', status: 'issues' }
-                                    ]
-                                },
-                                { id: 'f1_2', name: 'transactions.csv', type: 'CSV', size: '128 MB', lastModified: '11/26/2025', status: 'success' }
-                            ]
-                        },
-                        {
-                            id: 'f2', name: 'processed', type: 'FOLDER', size: '-', lastModified: '11/24/2025', status: '-', children: [
-                                { id: 'f2_1', name: 'analytics_2025.parquet', type: 'PARQUET', size: '450 MB', lastModified: '11/24/2025', status: 'success' }
-                            ]
-                        },
-                        { id: 'd1', name: 'manifest.json', type: 'JSON', size: '2 KB', lastModified: '11/26/2025', status: 'success' },
-                        { id: 'd2', name: 'schema_v1.sql', type: 'SQL', size: '15 KB', lastModified: '11/23/2025', status: 'success' },
-                        { id: 'd3', name: 'bad_records.csv', type: 'CSV', size: '5 MB', lastModified: '11/26/2025', status: 'issues' }
-                    ]
-                };
-                setFileSystem(mockData);
-            }
         } else {
             setSource('NOT_FOUND');
         }
     }, [id]);
 
-    // Update view when path changes
+    // Load Bedrock models
     useEffect(() => {
-        if (Object.keys(fileSystem).length === 0) return;
+        const loadModels = async () => {
+            if (source && source !== 'NOT_FOUND') {
+                try {
+                    const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
+                    const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
 
-        let currentItems = fileSystem.root;
-
-        // Traverse path safely
-        for (const folderName of currentPath) {
-            if (!currentItems) break;
-            const folder = currentItems.find(item => item.name === folderName && item.type === 'FOLDER');
-            if (folder && folder.children) {
-                currentItems = folder.children;
-            } else {
-                currentItems = []; // Path not found or empty
+                    const { listBedrockModels } = await import('../services/api');
+                    const data = await listBedrockModels(source.region, accessKey, secretKey);
+                    const modelsList = data.models || [];
+                    setModels(modelsList);
+                    if (modelsList.length > 0 && !selectedModel) {
+                        setSelectedModel(modelsList[0].model_id);
+                    }
+                } catch (err) {
+                    console.error('Error loading models:', err);
+                    const defaultModels = [
+                        { model_id: 'anthropic.claude-3-sonnet-20240229-v1:0', model_name: 'Claude 3 Sonnet', provider: 'Anthropic' },
+                        { model_id: 'anthropic.claude-3-haiku-20240307-v1:0', model_name: 'Claude 3 Haiku', provider: 'Anthropic' },
+                        { model_id: 'mistral.mistral-large-2402-v1:0', model_name: 'Mistral Large', provider: 'Mistral AI' }
+                    ];
+                    setModels(defaultModels);
+                    if (!selectedModel) {
+                        setSelectedModel(defaultModels[0].model_id);
+                    }
+                }
             }
+        };
+        loadModels();
+    }, [source]);
+
+    // Load files when source or path changes
+    useEffect(() => {
+        if (source && source !== 'NOT_FOUND') {
+            loadFiles();
         }
-        setItems(currentItems || []);
-        setSelectedItems(new Set()); // Clear selection on navigation
-    }, [currentPath, fileSystem]);
+    }, [source, currentPath]);
+
+    const loadFiles = async () => {
+        if (!source || !source.bucket) return;
+
+        setLoading(true);
+        setError(null);
+        try {
+            const prefix = currentPath.length > 0 ? currentPath.join('/') + '/' : '';
+            const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
+            const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
+            const roleArn = source.authMethod === 'assume_role' ? source.roleArn : undefined;
+
+            const data = await listFiles(source.bucket, prefix, source.region, accessKey, secretKey, roleArn);
+            setItems(data.files || []);
+        } catch (err) {
+            console.error('Error loading files:', err);
+            setError('Unable to load files. Please check your connection settings.');
+            setItems([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleNavigate = (folderName) => {
         setCurrentPath([...currentPath, folderName]);
@@ -92,36 +106,70 @@ const SourceDetails = () => {
         if (selectedItems.size === items.length) {
             setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set(items.map(item => item.id)));
+            setSelectedItems(new Set(items.map(item => item.key)));
         }
     };
 
-    const toggleSelectItem = (itemId) => {
+    const toggleSelectItem = (itemKey) => {
         const newSelected = new Set(selectedItems);
-        if (newSelected.has(itemId)) {
-            newSelected.delete(itemId);
+        if (newSelected.has(itemKey)) {
+            newSelected.delete(itemKey);
         } else {
-            newSelected.add(itemId);
+            newSelected.add(itemKey);
         }
         setSelectedItems(newSelected);
     };
 
-    const handleScan = () => {
+    const handleScan = async () => {
         if (selectedItems.size === 0) return;
 
-        setIsScanning(true);
-        setScanProgress(0);
+        console.log('[Quality Check] Starting...');
+        console.log('[Quality Check] Model:', selectedModel);
+        console.log('[Quality Check] Files:', Array.from(selectedItems));
 
-        const interval = setInterval(() => {
-            setScanProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setIsScanning(false);
-                    return 100;
-                }
-                return prev + 10;
-            });
-        }, 200);
+        setIsScanning(true);
+        setScanProgress(10);
+        setError(null);
+
+        try {
+            const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
+            const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
+            const roleArn = source.authMethod === 'assume_role' ? source.roleArn : undefined;
+
+            const keysToProcess = Array.from(selectedItems);
+
+            const progressInterval = setInterval(() => {
+                setScanProgress(prev => Math.min(prev + 5, 90));
+            }, 500);
+
+            const { extractMetadata } = await import('../services/api');
+            const result = await extractMetadata(
+                source.bucket,
+                keysToProcess,
+                source.region,
+                accessKey,
+                secretKey,
+                roleArn,
+                selectedModel
+            );
+
+            console.log('[Quality Check] Result:', result);
+
+            clearInterval(progressInterval);
+            setScanProgress(100);
+
+            await loadFiles();
+            setSelectedItems(new Set());
+
+            alert(`Processed ${result.successful} files successfully. ${result.failed} failed.`);
+
+        } catch (err) {
+            console.error('[Quality Check] Error:', err);
+            setError('Failed to run quality check: ' + (err.response?.data?.detail || err.message));
+        } finally {
+            setIsScanning(false);
+            setScanProgress(0);
+        }
     };
 
     if (source === 'NOT_FOUND') {
@@ -155,13 +203,38 @@ const SourceDetails = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <Button
-                        variant="primary"
-                        onClick={handleScan}
-                        disabled={isScanning || selectedItems.size === 0}
-                    >
-                        {isScanning ? `Checking ${scanProgress}%` : 'Run Quality Check'}
-                    </Button>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Bedrock Model</label>
+                            <select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                style={{
+                                    padding: '0.5rem',
+                                    borderRadius: '6px',
+                                    border: '1px solid #e2e8f0',
+                                    background: 'white',
+                                    fontSize: '0.875rem',
+                                    minWidth: '200px'
+                                }}
+                            >
+                                <option value="">Select a model...</option>
+                                {models.map(model => (
+                                    <option key={model.model_id} value={model.model_id}>
+                                        {model.model_name} ({model.provider})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <Button
+                            variant="primary"
+                            onClick={handleScan}
+                            disabled={isScanning || selectedItems.size === 0 || !selectedModel}
+                            style={{ marginTop: '1.25rem' }}
+                        >
+                            {isScanning ? `Checking ${scanProgress}%` : 'Run Quality Check'}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -192,6 +265,12 @@ const SourceDetails = () => {
                         </div>
                     </div>
 
+                    {error && (
+                        <div className="error-message" style={{ padding: '1rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px', margin: '1rem' }}>
+                            ⚠️ {error}
+                        </div>
+                    )}
+
                     <div className="table-responsive">
                         <table className="data-table">
                             <thead>
@@ -213,33 +292,39 @@ const SourceDetails = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items && items.length > 0 ? items.map(item => (
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                            Loading files...
+                                        </td>
+                                    </tr>
+                                ) : items && items.length > 0 ? items.map(item => (
                                     <tr
-                                        key={item.id}
-                                        className={`${item.type === 'FOLDER' ? 'folder-row' : ''} ${selectedItems.has(item.id) ? 'selected-row' : ''}`}
-                                        onClick={() => item.type === 'FOLDER' && handleNavigate(item.name)}
+                                        key={item.key}
+                                        className={`${item.is_folder ? 'folder-row' : ''} ${selectedItems.has(item.key) ? 'selected-row' : ''}`}
+                                        onClick={() => item.is_folder && handleNavigate(item.name)}
                                     >
                                         <td className="checkbox-col" onClick={(e) => e.stopPropagation()}>
                                             <input
                                                 type="checkbox"
-                                                checked={selectedItems.has(item.id)}
-                                                onChange={() => toggleSelectItem(item.id)}
+                                                checked={selectedItems.has(item.key)}
+                                                onChange={() => toggleSelectItem(item.key)}
                                                 className="custom-checkbox"
                                             />
                                         </td>
                                         <td>
                                             <div className="file-name">
-                                                <span className="file-icon">{item.type === 'FOLDER' ? '📁' : '📄'}</span>
+                                                <span className="file-icon">{item.is_folder ? '📁' : '📄'}</span>
                                                 {item.name}
                                             </div>
                                         </td>
-                                        <td>{item.size}</td>
+                                        <td>{item.size !== '-' ? (item.size / 1024).toFixed(1) + ' KB' : '-'}</td>
                                         <td>{item.type}</td>
-                                        <td>{item.lastModified}</td>
+                                        <td>{item.last_modified !== '-' ? new Date(item.last_modified).toLocaleDateString() : '-'}</td>
                                         <td>
-                                            {item.type !== 'FOLDER' && (
-                                                <span className={`status-badge ${item.status}`}>
-                                                    {item.status === 'success' ? 'Valid' : 'Issues'}
+                                            {!item.is_folder && (
+                                                <span className="status-badge success">
+                                                    Ready
                                                 </span>
                                             )}
                                         </td>
@@ -250,7 +335,7 @@ const SourceDetails = () => {
                                 )) : (
                                     <tr>
                                         <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                                            Empty folder
+                                            {error ? 'Failed to load files' : 'Empty folder'}
                                         </td>
                                     </tr>
                                 )}
