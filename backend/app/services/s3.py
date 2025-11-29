@@ -165,12 +165,13 @@ class S3Service:
             print(f"Error listing S3 objects: {str(e)}")
             raise e
 
-    async def read_file(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> str:
+    async def read_file(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, binary: bool = False) -> Any:
         client = self._get_client(region, access_key, secret_key, role_arn)
         try:
             response = client.get_object(Bucket=bucket, Key=key)
-            content = response['Body'].read().decode('utf-8')
-            return content
+            if binary:
+                return response['Body'].read()
+            return response['Body'].read().decode('utf-8')
         except Exception as e:
             print(f"Error reading file {key}: {str(e)}")
             raise e

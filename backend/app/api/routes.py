@@ -24,6 +24,10 @@ async def extract_metadata(request: ExtractMetadataRequest):
     Returns processing results for all files
     """
     try:
+        with open("C:/Users/soumi/Downloads/DataQuality/backend/debug_absolute.log", "a") as f:
+            f.write(f"Endpoint hit: extract-metadata\n")
+            f.write(f"Request: {request}\n")
+            
         results = await metadata_service.process_files(
             bucket=request.bucket,
             file_keys=request.keys,
@@ -57,9 +61,11 @@ async def list_bedrock_models(region: str = None, access_key: str = None, secret
     List available Bedrock foundation models
     """
     try:
+        print("Accessing /bedrock-models endpoint")
         from app.services.bedrock import BedrockService
         bedrock_service = BedrockService()
         models = bedrock_service.list_models(region, access_key, secret_key)
+        print(f"Found models: {len(models)}")
         return {"models": models}
     except Exception as e:
         raise HTTPException(
