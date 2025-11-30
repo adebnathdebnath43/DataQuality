@@ -183,3 +183,46 @@ async def list_files(bucket: str, prefix: str = "", region: str = None, access_k
 async def health_check():
     """API health check"""
     return HealthResponse(status="healthy", message="API is running")
+@router.get("/file-content")
+async def get_file_content(
+    bucket: str, 
+    key: str, 
+    region: str = None, 
+    access_key: str = None, 
+    secret_key: str = None, 
+    role_arn: str = None
+):
+    """
+    Get content of a specific file from S3 (expecting JSON)
+    """
+    try:
+        return await metadata_service.get_file_content(bucket, key, region, access_key, secret_key, role_arn)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error reading file: {str(e)}"
+        )
+
+
+@router.get("/scan-history")
+async def get_scan_history(
+    bucket: str,
+    prefix: str = "",
+    region: str = None,
+    access_key: str = None,
+    secret_key: str = None,
+    role_arn: str = None,
+    limit: int = 10
+):
+    """
+    Get recent scan history for dashboard visualization
+    Fetches and aggregates quality check results from S3
+    """
+    try:
+        return await metadata_service.get_scan_history(bucket, prefix, region, access_key, secret_key, role_arn, limit)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching scan history: {str(e)}"
+        )
+

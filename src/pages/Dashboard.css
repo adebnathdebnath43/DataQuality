@@ -43,6 +43,10 @@
     color: #fbbf24;
 }
 
+.stat-value.good {
+    color: #3b82f6;
+}
+
 .section-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
@@ -120,4 +124,131 @@
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg), var(--shadow-glow);
     border-color: var(--text-accent);
+}
+
+/* Recent Scans Section */
+.recent-scans-section {
+    margin-bottom: 4rem;
+}
+
+.scans-list {
+    padding: 1rem;
+}
+
+.scan-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.scan-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.scan-item:last-child {
+    border-bottom: none;
+}
+
+.scan-icon {
+    flex-shrink: 0;
+}
+
+.quality-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.quality-badge.excellent {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.quality-badge.good {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.quality-badge.fair {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.quality-badge.poor {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.scan-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.scan-details h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scan-details p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.scan-status {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.scan-status.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.scan-status.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .scan-details h4 {
+        font-size: 0.9rem;
+    }
+
+    .quality-badge {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+    }
 }

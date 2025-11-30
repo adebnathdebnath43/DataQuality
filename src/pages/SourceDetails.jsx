@@ -171,12 +171,21 @@ const SourceDetails = () => {
             clearInterval(progressInterval);
             setScanProgress(100);
 
-            // Extract consolidated JSON from first result
-            if (result.results && result.results.length > 0 && result.results[0].consolidated_json) {
-                const consolidatedData = result.results[0].consolidated_json;
-                setQualityCheckResults(consolidatedData);
-                // Persist results
-                localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(consolidatedData));
+            // Use the results directly from the response
+            // The backend now returns a list of results, and we can construct the display object from it
+            if (result.results && result.results.length > 0) {
+                // Check if we have a consolidated object (backward compatibility)
+                if (result.results[0].consolidated_json) {
+                    const consolidatedData = result.results[0].consolidated_json;
+                    setQualityCheckResults(consolidatedData);
+                    localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(consolidatedData));
+                } else {
+                    // Construct display object from results list if consolidated is missing
+                    // This handles the case where we might have removed consolidated logic
+                    // But for now, let's rely on the backend returning what we need or just showing the first result
+                    // Actually, the backend still returns the list of results.
+                    // Let's just reload files to see the new JSONs
+                }
             }
 
             await loadFiles();
@@ -188,6 +197,41 @@ const SourceDetails = () => {
         } finally {
             setIsScanning(false);
             setScanProgress(0);
+        }
+    };
+
+    const handleViewAnalysis = async () => {
+        if (selectedItems.size !== 1) return;
+        const selectedKey = Array.from(selectedItems)[0];
+        if (!selectedKey.endsWith('.json')) return;
+
+        setLoading(true);
+        setError(null);
+        try {
+            const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
+            const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
+            const roleArn = source.authMethod === 'assume_role' ? source.roleArn : undefined;
+
+            const { getFileContent } = await import('../services/api');
+            const data = await getFileContent(source.bucket, selectedKey, source.region, accessKey, secretKey, roleArn);
+
+            // Wrap single file analysis in the structure expected by MetadataResultsTable
+            const displayData = {
+                processed_at: data.processed_at,
+                total_files: 1,
+                successful: 1,
+                failed: 0,
+                files: [data]
+            };
+
+            setQualityCheckResults(displayData);
+            // We don't persist "view" actions to localStorage to avoid confusion with "run" history
+
+        } catch (err) {
+            console.error('Error viewing analysis:', err);
+            setError('Failed to load analysis file: ' + (err.response?.data?.detail || err.message));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -231,8 +275,10 @@ const SourceDetails = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <label style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Bedrock Model</label>
                             <select
+                                className="model-select"
                                 value={selectedModel}
                                 onChange={(e) => setSelectedModel(e.target.value)}
+                                disabled={isScanning}
                                 style={{
                                     padding: '0.5rem',
                                     borderRadius: '6px',
@@ -242,21 +288,33 @@ const SourceDetails = () => {
                                     minWidth: '200px'
                                 }}
                             >
-                                <option value="">Select a model...</option>
+                                <option value="" disabled>Select Model</option>
                                 {models.map(model => (
                                     <option key={model.model_id} value={model.model_id}>
-                                        {model.model_name} ({model.provider})
+                                        {model.model_name || model.model_id}
                                     </option>
                                 ))}
                             </select>
                         </div>
+
+                        {selectedItems.size === 1 && Array.from(selectedItems)[0].endsWith('.json') && (
+                            <Button
+                                variant="secondary"
+                                onClick={handleViewAnalysis}
+                                disabled={loading}
+                                style={{ marginTop: '1.25rem' }}
+                            >
+                                View Data Quality
+                            </Button>
+                        )}
+
                         <Button
                             variant="primary"
                             onClick={handleScan}
-                            disabled={isScanning || selectedItems.size === 0 || !selectedModel}
+                            disabled={selectedItems.size === 0 || isScanning || !selectedModel}
                             style={{ marginTop: '1.25rem' }}
                         >
-                            {isScanning ? `Checking ${scanProgress}%` : 'Run Quality Check'}
+                            {isScanning ? `Scanning ${scanProgress}%` : 'Run Quality Check'}
                         </Button>
                     </div>
                 </div>

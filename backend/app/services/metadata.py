@@ -141,20 +141,35 @@ class MetadataService:
                 )
                 self._log("Bedrock analysis complete")
                 
-                # 4. Store full analysis for consolidated JSON
+                # 4. Store analysis as individual JSON file
                 file_analysis = {
                     "file_key": key,
                     "file_name": file_name,
                     "status": "success",
                     "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
-                    **analysis  # Spread the analysis fields (file_name, document_type, summary, context, metadata, quality_score, quality_notes)
+                    **analysis
                 }
+                
+                # Write individual JSON file
+                json_key = f"{key}.json"
+                self._log(f"Writing result to S3: {json_key}")
+                self.s3_service.write_file(
+                    bucket=bucket,
+                    key=json_key,
+                    content=json.dumps(file_analysis, indent=2),
+                    region=region,
+                    access_key=access_key,
+                    secret_key=secret_key,
+                    role_arn=role_arn
+                )
+                
                 file_analyses.append(file_analysis)
                 
                 results.append({
                     "file_key": key,
                     "status": "success",
-                    "summary": analysis.get("summary", "No summary available")
+                    "summary": analysis.get("summary", "No summary available"),
+                    "metadata_key": json_key
                 })
                 
             except Exception as e:
@@ -173,43 +188,90 @@ class MetadataService:
                     "error": str(e),
                     "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
                 })
+
+        self._log(f"Processing complete. Processed {len(file_analyses)} files.")
         
-        # 5. Create consolidated JSON for all files
+        # Return results with full analysis data for immediate UI display
+        # We attach the full analysis list to the first result so the UI can grab it easily
+        # This maintains backward compatibility with the UI we just built
+        
         consolidated_json = {
             "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
-            "total_files": len(file_analyses),
-            "successful": sum(1 for f in file_analyses if f.get("status") == "success"),
-            "failed": sum(1 for f in file_analyses if f.get("status") == "error"),
+            "total_files": len(file_keys),
+            "successful": len([r for r in results if r["status"] == "success"]),
+            "failed": len([r for r in results if r["status"] == "error"]),
             "model_used": model_id,
             "files": file_analyses
         }
         
-        # 6. Write consolidated JSON to S3 (fixed name for replacement)
-        consolidated_key = "quality_check_results.json"
-        self._log(f"Writing consolidated results to S3: {consolidated_key}")
-        try:
-            await self.s3_service.write_file(
-                bucket=bucket,
-                key=consolidated_key,
-                content=json.dumps(consolidated_json, indent=2),
-                region=region,
-                access_key=access_key,
-                secret_key=secret_key,
-                role_arn=role_arn
-            )
-            self._log("Consolidated write complete")
+        if results:
+            results[0]["consolidated_json"] = consolidated_json
             
-            # Add S3 location to results
-            for result in results:
-                result["consolidated_json_key"] = consolidated_key
-                result["consolidated_json"] = consolidated_json
-                
-        except Exception as e:
-            self._log(f"Error writing consolidated JSON: {str(e)}")
-            # Continue even if S3 write fails - we still have the data to return
-        
         return results
 
-    async def get_metadata(self, bucket: str, file_key: str) -> Dict[str, Any]:
-        # Placeholder
-        raise NotImplementedError("Metadata retrieval not implemented")
+    async def get_file_content(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> Dict[str, Any]:
+        self._log(f"get_file_content called for bucket={bucket}, key={key}")
+        try:
+            content_bytes = await self.s3_service.read_file(bucket, key, region, access_key, secret_key, role_arn)
+            return json.loads(content_bytes)
+        except Exception as e:
+            self._log(f"Error reading file content {key}: {str(e)}")
+            raise e
+    
+    async def get_scan_history(self, bucket: str, prefix: str = "", region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Fetch recent scan history by reading .json result files from S3
+        Returns aggregated scan data for dashboard visualization
+        """
+        self._log(f"get_scan_history called for bucket={bucket}, prefix={prefix}")
+        try:
+            # List all files in the bucket
+            files_data = await self.s3_service.list_files(bucket, prefix, region, access_key, secret_key, role_arn)
+            files = files_data.get('files', [])
+            
+            # Filter for .json files (our scan results)
+            json_files = [f for f in files if f.get('key', '').endswith('.json') and not f.get('is_folder', False)]
+            
+            # Sort by last_modified (most recent first)
+            json_files.sort(key=lambda x: x.get('last_modified', ''), reverse=True)
+            
+            # Limit to requested number
+            json_files = json_files[:limit]
+            
+            # Fetch content of each JSON file
+            scan_results = []
+            for file_info in json_files:
+                try:
+                    content = await self.get_file_content(bucket, file_info['key'], region, access_key, secret_key, role_arn)
+                    
+                    # Extract relevant information
+                    scan_entry = {
+                        'file_key': file_info['key'],
+                        'file_name': content.get('file_name', file_info['key']),
+                        'processed_at': content.get('processed_at', file_info.get('last_modified', '')),
+                        'quality_score': content.get('quality_score', 0),
+                        'status': content.get('status', 'unknown'),
+                        'summary': content.get('summary', ''),
+                        'source_file': content.get('file_key', '').replace('.json', ''),
+                    }
+                    scan_results.append(scan_entry)
+                except Exception as e:
+                    self._log(f"Error reading scan result {file_info['key']}: {str(e)}")
+                    continue
+            
+            # Calculate aggregate statistics
+            total_scans = len(scan_results)
+            successful_scans = len([s for s in scan_results if s['status'] == 'success'])
+            avg_quality = sum(s['quality_score'] for s in scan_results) / total_scans if total_scans > 0 else 0
+            
+            return {
+                'scans': scan_results,
+                'total_scans': total_scans,
+                'successful_scans': successful_scans,
+                'failed_scans': total_scans - successful_scans,
+                'average_quality_score': round(avg_quality, 1)
+            }
+            
+        except Exception as e:
+            self._log(f"Error fetching scan history: {str(e)}")
+            raise e
