@@ -86,6 +86,8 @@ class MetadataService:
     async def process_files(self, bucket: str, file_keys: List[str], region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, model_id: str = None) -> List[Dict[str, Any]]:
         self._log(f"Processing {len(file_keys)} files from bucket {bucket}")
         results = []
+        file_analyses = []  # Store full analysis for each file
+        
         for key in file_keys:
             self._log(f"Starting processing for file: {key}")
             try:
@@ -116,6 +118,13 @@ class MetadataService:
                         "status": "error",
                         "error": error_msg
                     })
+                    file_analyses.append({
+                        "file_key": key,
+                        "file_name": key.split('/')[-1],
+                        "status": "error",
+                        "error": error_msg,
+                        "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                    })
                     continue
 
                 # 3. Analyze with Bedrock
@@ -132,33 +141,22 @@ class MetadataService:
                 )
                 self._log("Bedrock analysis complete")
                 
-                # 4. Create JSON structure
-                metadata_doc = {
-                    "source_file": key,
-                    "analysis": analysis,
-                    "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                # 4. Store full analysis for consolidated JSON
+                file_analysis = {
+                    "file_key": key,
+                    "file_name": file_name,
+                    "status": "success",
+                    "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                    **analysis  # Spread the analysis fields (file_name, document_type, summary, context, metadata, quality_score, quality_notes)
                 }
-                
-                # 5. Write JSON to S3
-                json_key = f"{key}.json"
-                self._log(f"Writing result to S3: {json_key}")
-                await self.s3_service.write_file(
-                    bucket=bucket,
-                    key=json_key,
-                    content=json.dumps(metadata_doc, indent=2),
-                    region=region,
-                    access_key=access_key,
-                    secret_key=secret_key,
-                    role_arn=role_arn
-                )
-                self._log("Write complete")
+                file_analyses.append(file_analysis)
                 
                 results.append({
                     "file_key": key,
                     "status": "success",
-                    "metadata_key": json_key,
                     "summary": analysis.get("summary", "No summary available")
                 })
+                
             except Exception as e:
                 self._log(f"Error processing {key}: {str(e)}")
                 import traceback
@@ -168,6 +166,48 @@ class MetadataService:
                     "status": "error",
                     "error": str(e)
                 })
+                file_analyses.append({
+                    "file_key": key,
+                    "file_name": key.split('/')[-1],
+                    "status": "error",
+                    "error": str(e),
+                    "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                })
+        
+        # 5. Create consolidated JSON for all files
+        consolidated_json = {
+            "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+            "total_files": len(file_analyses),
+            "successful": sum(1 for f in file_analyses if f.get("status") == "success"),
+            "failed": sum(1 for f in file_analyses if f.get("status") == "error"),
+            "model_used": model_id,
+            "files": file_analyses
+        }
+        
+        # 6. Write consolidated JSON to S3 (fixed name for replacement)
+        consolidated_key = "quality_check_results.json"
+        self._log(f"Writing consolidated results to S3: {consolidated_key}")
+        try:
+            await self.s3_service.write_file(
+                bucket=bucket,
+                key=consolidated_key,
+                content=json.dumps(consolidated_json, indent=2),
+                region=region,
+                access_key=access_key,
+                secret_key=secret_key,
+                role_arn=role_arn
+            )
+            self._log("Consolidated write complete")
+            
+            # Add S3 location to results
+            for result in results:
+                result["consolidated_json_key"] = consolidated_key
+                result["consolidated_json"] = consolidated_json
+                
+        except Exception as e:
+            self._log(f"Error writing consolidated JSON: {str(e)}")
+            # Continue even if S3 write fails - we still have the data to return
+        
         return results
 
     async def get_metadata(self, bucket: str, file_key: str) -> Dict[str, Any]:

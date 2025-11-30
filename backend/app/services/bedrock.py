@@ -106,25 +106,41 @@ class BedrockService:
         print(f"[DEBUG] Using model from UI selection: {model_to_use}")
         
         prompt = f"""
-        You are a data quality assistant. Analyze the following document content and extract:
-        1. A brief summary (max 3 sentences).
-        2. Key metadata (dates, entities, topics).
-        3. The context or purpose of the document.
-        4. A data quality score (0-100) based on completeness and clarity.
-
+        You are a data quality and metadata extraction assistant. Analyze the following document content and extract comprehensive information.
+        
         File Name: {file_name}
         
         Content:
         {content[:10000]}
-
-        Return ONLY a valid JSON object with the following structure:
+        
+        Extract and return ONLY a valid JSON object with the following structure:
         {{
-            "summary": "...",
-            "metadata": {{ "topics": [], "entities": [], "dates": [] }},
-            "context": "...",
+            "file_name": "{file_name}",
+            "document_type": "type of document (e.g., report, presentation, contract, email, etc.)",
+            "summary": "A brief summary in 2-3 sentences describing the main content and purpose",
+            "context": "The context or purpose of this document - why it exists and what it's used for",
+            "metadata": {{
+                "people": ["List of person names mentioned in the document with their roles if available, e.g., 'John Doe (CEO)', 'Jane Smith'"],
+                "locations": ["List of locations, cities, countries, addresses mentioned"],
+                "organizations": ["List of companies, organizations, institutions mentioned"],
+                "dates": ["List of important dates, time periods, or deadlines mentioned"],
+                "topics": ["List of main topics, themes, or subjects covered"],
+                "emails": ["List of email addresses found"],
+                "phones": ["List of phone numbers found"],
+                "keywords": ["List of important keywords or technical terms"],
+                "other": {{
+                    "any_other_key": "any other important metadata you find"
+                }}
+            }},
             "quality_score": 85,
-            "quality_notes": "..."
+            "quality_notes": "Assessment of data quality, completeness, clarity, and any issues found"
         }}
+        
+        IMPORTANT: 
+        - Extract ALL entities you can find in the document
+        - If a category has no items, use an empty array []
+        - Be thorough and extract as much relevant information as possible
+        - Return ONLY the JSON object, no additional text
         """
 
         # Different models use different request formats

@@ -15,6 +15,8 @@ class FileProcessingResult(BaseModel):
     status: str
     metadata_key: Optional[str] = None
     error: Optional[str] = None
+    consolidated_json_key: Optional[str] = None
+    consolidated_json: Optional[Dict[str, Any]] = None
 
 class ExtractMetadataResponse(BaseModel):
     total_files: int

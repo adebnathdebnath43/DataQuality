@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import MetadataResultsTable from '../components/MetadataResultsTable';
 import { listFiles } from '../services/api';
 import './SourceDetails.css';
 
@@ -17,6 +18,7 @@ const SourceDetails = () => {
     const [error, setError] = useState(null);
     const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState('');
+    const [qualityCheckResults, setQualityCheckResults] = useState(null);
 
     useEffect(() => {
         const sources = JSON.parse(localStorage.getItem('connectedSources') || '[]');
@@ -26,6 +28,16 @@ const SourceDetails = () => {
             setSource(foundSource);
         } else {
             setSource('NOT_FOUND');
+        }
+
+        // Load persisted results
+        const savedResults = localStorage.getItem(`qualityCheckResults_${id}`);
+        if (savedResults) {
+            try {
+                setQualityCheckResults(JSON.parse(savedResults));
+            } catch (e) {
+                console.error('Failed to parse saved results', e);
+            }
         }
     }, [id]);
 
@@ -130,6 +142,7 @@ const SourceDetails = () => {
         setIsScanning(true);
         setScanProgress(10);
         setError(null);
+        setQualityCheckResults(null); // Clear previous results
 
         try {
             const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
@@ -158,10 +171,16 @@ const SourceDetails = () => {
             clearInterval(progressInterval);
             setScanProgress(100);
 
+            // Extract consolidated JSON from first result
+            if (result.results && result.results.length > 0 && result.results[0].consolidated_json) {
+                const consolidatedData = result.results[0].consolidated_json;
+                setQualityCheckResults(consolidatedData);
+                // Persist results
+                localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(consolidatedData));
+            }
+
             await loadFiles();
             setSelectedItems(new Set());
-
-            alert(`Processed ${result.successful} files successfully. ${result.failed} failed.`);
 
         } catch (err) {
             console.error('[Quality Check] Error:', err);
@@ -170,6 +189,11 @@ const SourceDetails = () => {
             setIsScanning(false);
             setScanProgress(0);
         }
+    };
+
+    const clearResults = () => {
+        setQualityCheckResults(null);
+        localStorage.removeItem(`qualityCheckResults_${id}`);
     };
 
     if (source === 'NOT_FOUND') {
@@ -343,6 +367,18 @@ const SourceDetails = () => {
                         </table>
                     </div>
                 </Card>
+
+                {/* Quality Check Results */}
+                {qualityCheckResults && (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                            <Button variant="secondary" onClick={clearResults}>
+                                Clear Results
+                            </Button>
+                        </div>
+                        <MetadataResultsTable results={qualityCheckResults} />
+                    </>
+                )}
             </section>
         </div>
     );
