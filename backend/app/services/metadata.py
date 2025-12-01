@@ -204,20 +204,250 @@ class MetadataService:
             "files": file_analyses
         }
         
+        # Save consolidated JSON to S3 in output_folder
+        timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        consolidated_key = f"output_folder/quality_check_results_{timestamp}.json"
+        self._log(f"Saving consolidated results to S3: {consolidated_key}")
+        
+        try:
+            await self.s3_service.write_file(
+                bucket=bucket,
+                key=consolidated_key,
+                content=json.dumps(consolidated_json, indent=2),
+                region=region,
+                access_key=access_key,
+                secret_key=secret_key,
+                role_arn=role_arn
+            )
+            self._log(f"Consolidated results saved successfully to {consolidated_key}")
+        except Exception as e:
+            self._log(f"Warning: Failed to save consolidated results: {str(e)}")
+            
+        # Save LOCALLY as requested by user
+        try:
+            import os
+            local_dir = "data/results"
+            os.makedirs(local_dir, exist_ok=True)
+            local_filename = f"{local_dir}/results_{bucket}_{timestamp}.json"
+            with open(local_filename, "w") as f:
+                json.dump(consolidated_json, f, indent=2)
+            self._log(f"Saved local result copy to {local_filename}")
+        except Exception as e:
+            self._log(f"Failed to save local result: {str(e)}")
+        
         if results:
             results[0]["consolidated_json"] = consolidated_json
+            results[0]["consolidated_key"] = consolidated_key
             
         return results
+
+    def list_local_history(self) -> List[Dict[str, Any]]:
+        """List all locally saved result files"""
+        import os
+        import glob
+        
+        local_dir = "data/results"
+        if not os.path.exists(local_dir):
+            return []
+            
+        files = []
+        for filepath in glob.glob(f"{local_dir}/*.json"):
+            try:
+                filename = os.path.basename(filepath)
+                stats = os.stat(filepath)
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                    
+                files.append({
+                    "filename": filename,
+                    "created_at": datetime.datetime.fromtimestamp(stats.st_mtime).isoformat(),
+                    "total_files": data.get("total_files", 0),
+                    "successful": data.get("successful", 0),
+                    "failed": data.get("failed", 0),
+                    "model_used": data.get("model_used", "unknown")
+                })
+            except Exception as e:
+                self._log(f"Error reading local file {filepath}: {str(e)}")
+                
+        # Sort by creation time (newest first)
+        files.sort(key=lambda x: x['created_at'], reverse=True)
+        return files
+
+    def get_local_history_content(self, filename: str) -> Dict[str, Any]:
+        """Get content of a specific local result file"""
+        import os
+        local_dir = "data/results"
+        filepath = os.path.join(local_dir, filename)
+        
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Local file not found: {filename}")
+            
+        with open(filepath, 'r') as f:
+            return json.load(f)
 
     async def get_file_content(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> Dict[str, Any]:
         self._log(f"get_file_content called for bucket={bucket}, key={key}")
         try:
             content_bytes = await self.s3_service.read_file(bucket, key, region, access_key, secret_key, role_arn)
             return json.loads(content_bytes)
+        except FileNotFoundError:
+            # Auto-reconstruction: If the summary file is missing, try to build it from individual files
+            if "quality_check_results" in key:
+                self._log(f"Summary file {key} not found. Attempting to reconstruct from individual files...")
+                try:
+                    # List files in root AND output_folder to be sure we catch everything
+                    all_files = []
+                    
+                    # 1. Check root
+                    root_data = await self.s3_service.list_files(bucket, "", region, access_key, secret_key, role_arn)
+                    all_files.extend(root_data.get('files', []))
+                    
+                    # 2. Check output_folder
+                    out_data = await self.s3_service.list_files(bucket, "output_folder/", region, access_key, secret_key, role_arn)
+                    all_files.extend(out_data.get('files', []))
+                    
+                    # Filter for individual analysis files
+                    json_files = [f for f in all_files if f.get('key', '').endswith('.json') and 
+                                  "quality_check_results" not in f.get('key', '') and 
+                                  not f.get('is_folder', False)]
+                    
+                    # Remove duplicates based on key
+                    unique_files = {f['key']: f for f in json_files}.values()
+                    json_files = list(unique_files)
+                    
+                    # Sort by most recent
+                    json_files.sort(key=lambda x: x.get('last_modified', ''), reverse=True)
+                    json_files = json_files[:50]
+                    
+                    reconstructed_files = []
+                    successful = 0
+                    failed = 0
+                    
+                    # Add a DEBUG entry so the user sees SOMETHING
+                    reconstructed_files.append({
+                        "file_name": "🔍 SYSTEM DIAGNOSTIC",
+                        "status": "info",
+                        "summary": f"Found {len(json_files)} potential analysis files. Attempting to load...",
+                        "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                    })
+                    
+                    for file_info in json_files:
+                        try:
+                            content = await self.s3_service.read_file(bucket, file_info['key'], region, access_key, secret_key, role_arn)
+                            data = json.loads(content)
+                            reconstructed_files.append(data)
+                            if data.get('status') == 'success':
+                                successful += 1
+                            else:
+                                failed += 1
+                        except Exception as read_err:
+                            reconstructed_files.append({
+                                "file_name": file_info['key'],
+                                "status": "error",
+                                "error": f"Failed to read: {str(read_err)}",
+                                "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                            })
+                            
+                    # Construct consolidated response
+                    consolidated_data = {
+                        "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                        "total_files": len(reconstructed_files),
+                        "successful": successful,
+                        "failed": failed,
+                        "model_used": "reconstructed",
+                        "files": reconstructed_files
+                    }
+                    
+                    self._log("Successfully reconstructed results")
+                    return consolidated_data
+                    
+                except Exception as reconstruct_err:
+                    self._log(f"Reconstruction failed: {str(reconstruct_err)}")
+                    raise FileNotFoundError(f"File not found: {key} and failed to reconstruct.")
+            
+            raise
         except Exception as e:
             self._log(f"Error reading file content {key}: {str(e)}")
             raise e
     
+    async def reconstruct_results(self, bucket: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> Dict[str, Any]:
+        """
+        Explicitly reconstruct results by scanning the bucket for all analysis files.
+        This is used by the 'Load Past Results' button.
+        """
+        self._log(f"reconstruct_results called for bucket={bucket}")
+        try:
+            # List files in root AND output_folder
+            all_files = []
+            
+            # 1. Check root
+            root_data = await self.s3_service.list_files(bucket, "", region, access_key, secret_key, role_arn)
+            all_files.extend(root_data.get('files', []))
+            
+            # 2. Check output_folder
+            out_data = await self.s3_service.list_files(bucket, "output_folder/", region, access_key, secret_key, role_arn)
+            all_files.extend(out_data.get('files', []))
+            
+            # Filter for individual analysis files
+            json_files = [f for f in all_files if f.get('key', '').endswith('.json') and 
+                          "quality_check_results" not in f.get('key', '') and 
+                          not f.get('is_folder', False)]
+            
+            # Remove duplicates
+            unique_files = {f['key']: f for f in json_files}.values()
+            json_files = list(unique_files)
+            
+            # Sort by most recent
+            json_files.sort(key=lambda x: x.get('last_modified', ''), reverse=True)
+            json_files = json_files[:50]
+            
+            reconstructed_files = []
+            successful = 0
+            failed = 0
+            
+            for file_info in json_files:
+                try:
+                    content = await self.s3_service.read_file(bucket, file_info['key'], region, access_key, secret_key, role_arn)
+                    data = json.loads(content)
+                    reconstructed_files.append(data)
+                    if data.get('status') == 'success':
+                        successful += 1
+                    else:
+                        failed += 1
+                except Exception as read_err:
+                    reconstructed_files.append({
+                        "file_name": file_info['key'],
+                        "status": "error",
+                        "error": f"Failed to read: {str(read_err)}",
+                        "processed_at": datetime.datetime.utcnow().isoformat() + "Z"
+                    })
+            
+            if not reconstructed_files:
+                # Return empty structure instead of error
+                return {
+                    "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                    "total_files": 0,
+                    "successful": 0,
+                    "failed": 0,
+                    "model_used": "none",
+                    "files": [],
+                    "note": "No analysis files found in bucket."
+                }
+                
+            return {
+                "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                "total_files": len(reconstructed_files),
+                "successful": successful,
+                "failed": failed,
+                "model_used": "reconstructed",
+                "files": reconstructed_files,
+                "note": "Loaded from history"
+            }
+            
+        except Exception as e:
+            self._log(f"Error reconstructing results: {str(e)}")
+            raise e
+
     async def get_scan_history(self, bucket: str, prefix: str = "", region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, limit: int = 10) -> List[Dict[str, Any]]:
         """
         Fetch recent scan history by reading .json result files from S3

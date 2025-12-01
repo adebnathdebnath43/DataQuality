@@ -11,6 +11,10 @@ router = APIRouter()
 metadata_service = MetadataService()
 
 
+@router.get("/ping")
+async def ping():
+    return {"message": "pong"}
+
 @router.post("/extract-metadata", response_model=ExtractMetadataResponse)
 async def extract_metadata(request: ExtractMetadataRequest):
     """
@@ -196,12 +200,65 @@ async def get_file_content(
     Get content of a specific file from S3 (expecting JSON)
     """
     try:
-        return await metadata_service.get_file_content(bucket, key, region, access_key, secret_key, role_arn)
+        # Sanitize key
+        key = key.strip()
+        import urllib.parse
+        key = urllib.parse.unquote(key)
+        
+        print(f"[ROUTE] /file-content called with bucket={bucket}, key={key}, region={region}")
+        result = await metadata_service.get_file_content(bucket, key, region, access_key, secret_key, role_arn)
+        print(f"[ROUTE] Successfully retrieved file content")
+        return result
+    except FileNotFoundError as e:
+        print(f"[ROUTE] File not found in S3: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"S3 File Not Found: {str(e)}"
+        )
     except Exception as e:
+        print(f"[ROUTE] Error reading file: {type(e).__name__}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error reading file: {str(e)}"
         )
+
+@router.get("/scan-results")
+async def scan_results(
+    bucket: str, 
+    region: str = None, 
+    access_key: str = None, 
+    secret_key: str = None, 
+    role_arn: str = None
+):
+    """
+    Explicitly scan bucket for past analysis results
+    """
+    try:
+        print(f"[ROUTE] /scan-results called for bucket={bucket}")
+        result = await metadata_service.reconstruct_results(bucket, region, access_key, secret_key, role_arn)
+        return result
+    except Exception as e:
+        print(f"[ROUTE] Error scanning results: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error scanning results: {str(e)}"
+        )
+
+@router.get("/history")
+async def list_history():
+    """List all local history files"""
+    try:
+        return metadata_service.list_local_history()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/history/{filename}")
+async def get_history_content(filename: str):
+    """Get content of a specific history file"""
+    try:
+        return metadata_service.get_local_history_content(filename)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/scan-history")

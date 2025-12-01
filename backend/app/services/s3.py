@@ -1,5 +1,6 @@
 import boto3
 import json
+import urllib.parse
 from datetime import datetime
 from typing import Dict, Any, List, Tuple
 from app.config import settings
@@ -166,14 +167,68 @@ class S3Service:
             raise e
 
     async def read_file(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, binary: bool = False) -> Any:
+        """Read file content from S3"""
         client = self._get_client(region, access_key, secret_key, role_arn)
         try:
+            print(f"[S3Service] Reading file: bucket={bucket}, key={key}, region={region}, binary={binary}")
             response = client.get_object(Bucket=bucket, Key=key)
+            content_bytes = response['Body'].read()
+            print(f"[S3Service] Successfully read {len(content_bytes)} bytes from {key}")
+            
             if binary:
-                return response['Body'].read()
-            return response['Body'].read().decode('utf-8')
+                return content_bytes
+            else:
+                decoded = content_bytes.decode('utf-8')
+                print(f"[S3Service] Decoded {len(decoded)} characters")
+                return decoded
+        except client.exceptions.NoSuchKey:
+            print(f"[S3Service] ERROR: File not found - bucket={bucket}, key={key}")
+            
+            # Fuzzy match attempt: List files and try to find a close match
+            try:
+                print(f"[S3Service] Attempting fuzzy match for {key}...")
+                # List objects in the same 'folder'
+                prefix = '/'.join(key.split('/')[:-1]) if '/' in key else ''
+                list_resp = client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+                
+                if 'Contents' in list_resp:
+                    target_name = key.split('/')[-1].strip().lower()
+                    for obj in list_resp['Contents']:
+                        obj_key = obj['Key']
+                        obj_name = obj_key.split('/')[-1].strip().lower()
+                        
+                        # Check if it's the same file but maybe with different whitespace/encoding
+                        if obj_name == target_name or urllib.parse.unquote(obj_name) == target_name:
+                            print(f"[S3Service] Found fuzzy match: {obj_key}")
+                            # Try reading this key instead
+                            response = client.get_object(Bucket=bucket, Key=obj_key)
+                            content_bytes = response['Body'].read()
+                            if binary:
+                                return content_bytes
+                            else:
+                                return content_bytes.decode('utf-8')
+            except Exception as fuzzy_err:
+                print(f"[S3Service] Fuzzy match failed: {str(fuzzy_err)}")
+
+            # If still not found, raise error with helpful message
+            available_files = []
+            try:
+                # List top 10 files to show user what's there
+                list_resp = client.list_objects_v2(Bucket=bucket, MaxKeys=10, Prefix=prefix)
+                if 'Contents' in list_resp:
+                    available_files = [obj['Key'] for obj in list_resp['Contents']]
+            except:
+                pass
+                
+            msg = f"File not found: {key}."
+            if available_files:
+                msg += f" Did you mean: {', '.join(available_files)}?"
+            else:
+                msg += " Bucket appears empty or path is incorrect."
+                
+            raise FileNotFoundError(msg)
         except Exception as e:
-            print(f"Error reading file {key}: {str(e)}")
+            print(f"[S3Service] ERROR reading file {key}: {type(e).__name__}: {str(e)}")
             raise e
 
     async def write_file(self, bucket: str, key: str, content: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> str:

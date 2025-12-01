@@ -8,6 +8,53 @@ const MetadataResultsTable = ({ results }) => {
         return null;
     }
 
+    // Get all unique metadata fields from all files
+    const getAllMetadataFields = () => {
+        const fieldsSet = new Set();
+        results.files.forEach(file => {
+            if (file.metadata && typeof file.metadata === 'object') {
+                Object.keys(file.metadata).forEach(key => {
+                    // Only include fields that have values in at least one file
+                    const value = file.metadata[key];
+                    if (value && (Array.isArray(value) ? value.length > 0 : true)) {
+                        fieldsSet.add(key);
+                    }
+                });
+            }
+        });
+        return Array.from(fieldsSet).sort();
+    };
+
+    const metadataFields = getAllMetadataFields();
+
+    // Icon mapping for common metadata fields
+    const getFieldIcon = (field) => {
+        const iconMap = {
+            'people': '👤',
+            'locations': '📍',
+            'organizations': '🏢',
+            'dates': '📅',
+            'topics': '🏷️',
+            'keywords': '🔑',
+            'emails': '📧',
+            'phones': '📞',
+            'urls': '🔗',
+            'addresses': '🏠',
+            'companies': '🏭',
+            'products': '📦',
+            'events': '🎉',
+            'technologies': '💻',
+            'currencies': '💰',
+            'percentages': '📊'
+        };
+        return iconMap[field.toLowerCase()] || '📋';
+    };
+
+    // Format field name for display
+    const formatFieldName = (field) => {
+        return field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+    };
+
     const toggleRow = (index) => {
         const newExpanded = new Set(expandedRows);
         if (newExpanded.has(index)) {
@@ -33,7 +80,7 @@ const MetadataResultsTable = ({ results }) => {
                 </span>
             );
         }
-        return value;
+        return String(value);
     };
 
     const renderExpandedMetadata = (file) => {
@@ -42,93 +89,25 @@ const MetadataResultsTable = ({ results }) => {
         return (
             <div className="expanded-metadata">
                 <div className="metadata-grid">
-                    {file.metadata.people && file.metadata.people.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>👤 People</h4>
-                            <ul>
-                                {file.metadata.people.map((person, idx) => (
-                                    <li key={idx}>{person}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    {metadataFields.map(field => {
+                        const value = file.metadata[field];
+                        if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
-                    {file.metadata.locations && file.metadata.locations.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>📍 Locations</h4>
-                            <ul>
-                                {file.metadata.locations.map((loc, idx) => (
-                                    <li key={idx}>{loc}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.organizations && file.metadata.organizations.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>🏢 Organizations</h4>
-                            <ul>
-                                {file.metadata.organizations.map((org, idx) => (
-                                    <li key={idx}>{org}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.dates && file.metadata.dates.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>📅 Dates</h4>
-                            <ul>
-                                {file.metadata.dates.map((date, idx) => (
-                                    <li key={idx}>{date}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.topics && file.metadata.topics.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>🏷️ Topics</h4>
-                            <ul>
-                                {file.metadata.topics.map((topic, idx) => (
-                                    <li key={idx}>{topic}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.keywords && file.metadata.keywords.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>🔑 Keywords</h4>
-                            <ul>
-                                {file.metadata.keywords.map((keyword, idx) => (
-                                    <li key={idx}>{keyword}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.emails && file.metadata.emails.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>📧 Emails</h4>
-                            <ul>
-                                {file.metadata.emails.map((email, idx) => (
-                                    <li key={idx}>{email}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {file.metadata.phones && file.metadata.phones.length > 0 && (
-                        <div className="metadata-section">
-                            <h4>📞 Phones</h4>
-                            <ul>
-                                {file.metadata.phones.map((phone, idx) => (
-                                    <li key={idx}>{phone}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                        return (
+                            <div key={field} className="metadata-section">
+                                <h4>{getFieldIcon(field)} {formatFieldName(field)}</h4>
+                                {Array.isArray(value) ? (
+                                    <ul>
+                                        {value.map((item, idx) => (
+                                            <li key={idx}>{item}</li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>{String(value)}</p>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="full-text-sections">
@@ -138,7 +117,7 @@ const MetadataResultsTable = ({ results }) => {
                     </div>
 
                     <div className="text-section">
-                        <h4>🎯 Context</h4>
+                        <h4>🎯 Full Context</h4>
                         <p>{file.context || 'No context available'}</p>
                     </div>
 
@@ -182,11 +161,11 @@ const MetadataResultsTable = ({ results }) => {
                             <th className="expand-col"></th>
                             <th>File Name</th>
                             <th>Document Type</th>
-                            <th>People</th>
-                            <th>Locations</th>
-                            <th>Organizations</th>
-                            <th>Topics</th>
-                            <th>Summary</th>
+                            {metadataFields.map(field => (
+                                <th key={field}>{formatFieldName(field)}</th>
+                            ))}
+                            <th style={{ minWidth: '200px' }}>Summary</th>
+                            <th style={{ minWidth: '200px' }}>Context</th>
                             <th>
                                 <div className="quality-score-header">
                                     Quality Score
@@ -219,14 +198,18 @@ const MetadataResultsTable = ({ results }) => {
                                     </td>
                                     <td className="file-name" title={file.file_name}>{file.file_name}</td>
                                     <td>{file.document_type || '-'}</td>
-                                    <td>{renderMetadataCell(file.metadata, 'people')}</td>
-                                    <td>{renderMetadataCell(file.metadata, 'locations')}</td>
-                                    <td>{renderMetadataCell(file.metadata, 'organizations')}</td>
-                                    <td>{renderMetadataCell(file.metadata, 'topics')}</td>
+                                    {metadataFields.map(field => (
+                                        <td key={field}>{renderMetadataCell(file.metadata, field)}</td>
+                                    ))}
                                     <td className="summary-cell" title={file.summary}>
                                         {file.status === 'success'
                                             ? (file.summary?.substring(0, 100) + (file.summary?.length > 100 ? '...' : ''))
                                             : file.error}
+                                    </td>
+                                    <td className="summary-cell" title={file.context}>
+                                        {file.status === 'success'
+                                            ? (file.context?.substring(0, 100) + (file.context?.length > 100 ? '...' : ''))
+                                            : '-'}
                                     </td>
                                     <td>
                                         {file.quality_score && (
@@ -243,7 +226,7 @@ const MetadataResultsTable = ({ results }) => {
                                 </tr>
                                 {expandedRows.has(index) && file.status === 'success' && (
                                     <tr className="expanded-row">
-                                        <td colSpan="10">
+                                        <td colSpan={metadataFields.length + 8}>
                                             {renderExpandedMetadata(file)}
                                         </td>
                                     </tr>

@@ -20,6 +20,7 @@ const ConfigureConnection = () => {
     const getFields = () => {
         if (sourceId === 'aws') {
             const commonFields = [
+                { name: 'connectionName', label: 'Connection Name (Optional)', type: 'text', placeholder: 'e.g., Production Account, Dev Environment', required: false },
                 { name: 'bucket', label: 'Bucket Name', type: 'text', required: true },
                 { name: 'region', label: 'Region', type: 'text', placeholder: 'us-east-1', required: true },
             ];
@@ -86,10 +87,23 @@ const ConfigureConnection = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Create a unique source name for S3
+        let displayName = sourceDetails.name;
+        if (sourceId === 'aws') {
+            if (formData.connectionName) {
+                // Use custom connection name if provided
+                displayName = formData.connectionName;
+            } else if (formData.bucket) {
+                // Fall back to bucket name
+                displayName = `S3_${formData.bucket}`;
+            }
+        }
+
         const connectionData = {
             id: Date.now().toString(),
             sourceId,
-            sourceName: sourceDetails.name,
+            sourceName: displayName,
             icon: sourceDetails.icon,
             connectedAt: new Date().toISOString(),
             ...formData,

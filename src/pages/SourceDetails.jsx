@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import MetadataResultsTable from '../components/MetadataResultsTable';
-import { listFiles } from '../services/api';
+import { listFiles, listHistory, getHistoryContent } from '../services/api';
 import './SourceDetails.css';
 
 const SourceDetails = () => {
@@ -19,6 +19,8 @@ const SourceDetails = () => {
     const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState('');
     const [qualityCheckResults, setQualityCheckResults] = useState(null);
+    const [showHistory, setShowHistory] = useState(false);
+    const [historyFiles, setHistoryFiles] = useState([]);
 
     useEffect(() => {
         const sources = JSON.parse(localStorage.getItem('connectedSources') || '[]');
@@ -240,6 +242,32 @@ const SourceDetails = () => {
         localStorage.removeItem(`qualityCheckResults_${id}`);
     };
 
+    const handleViewHistory = async () => {
+        try {
+            setLoading(true);
+            const data = await listHistory();
+            setHistoryFiles(data);
+            setShowHistory(true);
+        } catch (err) {
+            setError('Failed to load history list: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadHistoryFile = async (filename) => {
+        try {
+            setLoading(true);
+            const data = await getHistoryContent(filename);
+            setQualityCheckResults(data);
+            setShowHistory(false);
+        } catch (err) {
+            setError('Failed to load history file: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (source === 'NOT_FOUND') {
         return (
             <div className="container" style={{ paddingTop: '4rem', textAlign: 'center', color: 'white' }}>
@@ -316,6 +344,15 @@ const SourceDetails = () => {
                         >
                             {isScanning ? `Scanning ${scanProgress}%` : 'Run Quality Check'}
                         </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={handleViewHistory}
+                            disabled={loading || isScanning}
+                            style={{ marginTop: '1.25rem' }}
+                        >
+                            📜 View History
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -350,6 +387,55 @@ const SourceDetails = () => {
                     {error && (
                         <div className="error-message" style={{ padding: '1rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px', margin: '1rem' }}>
                             ⚠️ {error}
+                        </div>
+                    )}
+
+                    {showHistory && (
+                        <div className="modal-overlay" style={{
+                            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(0,0,0,0.7)', zIndex: 1000,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <div className="modal-content" style={{
+                                background: '#1e293b', padding: '2rem', borderRadius: '8px',
+                                width: '600px', maxHeight: '80vh', overflowY: 'auto',
+                                border: '1px solid #334155'
+                            }}>
+                                <h2 style={{ color: 'white', marginBottom: '1.5rem' }}>Select Result to View</h2>
+                                {historyFiles.length === 0 ? (
+                                    <p style={{ color: '#94a3b8' }}>No history files found.</p>
+                                ) : (
+                                    <div className="history-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        {historyFiles.map(file => (
+                                            <div key={file.filename}
+                                                onClick={() => loadHistoryFile(file.filename)}
+                                                style={{
+                                                    padding: '1rem', background: '#0f172a', borderRadius: '6px',
+                                                    cursor: 'pointer', border: '1px solid #334155',
+                                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                                }}
+                                                onMouseOver={e => e.currentTarget.style.borderColor = '#3b82f6'}
+                                                onMouseOut={e => e.currentTarget.style.borderColor = '#334155'}
+                                            >
+                                                <div>
+                                                    <div style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{new Date(file.created_at).toLocaleString()}</div>
+                                                    <div style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+                                                        {file.total_files} files • {file.successful} success • {file.failed} failed
+                                                    </div>
+                                                </div>
+                                                <div style={{ color: '#3b82f6' }}>View →</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setShowHistory(false)}
+                                    style={{ marginTop: '1.5rem', width: '100%' }}
+                                >
+                                    Close
+                                </Button>
+                            </div>
                         </div>
                     )}
 

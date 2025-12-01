@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8001/api';
+const API_URL = 'http://localhost:8002/api';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -61,6 +61,8 @@ export const extractMetadata = async (bucket, keys, region = null, accessKey = n
 export default api;
 export const getFileContent = async (bucket, key, region = null, accessKey = null, secretKey = null, roleArn = null) => {
     try {
+        console.log('[API] getFileContent called with:', { bucket, key, region, accessKey: accessKey ? '***' : null, secretKey: secretKey ? '***' : null, roleArn });
+
         const params = {
             bucket,
             key,
@@ -69,10 +71,19 @@ export const getFileContent = async (bucket, key, region = null, accessKey = nul
             secret_key: secretKey,
             role_arn: roleArn
         };
+
+        // Log params with masked credentials
+        console.log('[API] Calling /file-content with params:', {
+            ...params,
+            access_key: params.access_key ? '***' : null,
+            secret_key: params.secret_key ? '***' : null
+        });
         const response = await api.get('/file-content', { params });
+        console.log('[API] getFileContent response received');
         return response.data;
     } catch (error) {
-        console.error('Error reading file content:', error);
+        console.error('[API] Error reading file content:', error);
+        console.error('[API] Error response:', error.response?.data);
         throw error;
     }
 };
@@ -92,6 +103,26 @@ export const getScanHistory = async (bucket, prefix = '', region = null, accessK
         return response.data;
     } catch (error) {
         console.error('Error fetching scan history:', error);
+        throw error;
+    }
+};
+
+export const listHistory = async () => {
+    try {
+        const response = await api.get('/history');
+        return response.data;
+    } catch (error) {
+        console.error('Error listing history:', error);
+        throw error;
+    }
+};
+
+export const getHistoryContent = async (filename) => {
+    try {
+        const response = await api.get(`/history/${filename}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error getting history content:', error);
         throw error;
     }
 };
