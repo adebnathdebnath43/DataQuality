@@ -515,6 +515,55 @@ const SourceDetails = () => {
                 {/* Quality Check Results */}
                 {qualityCheckResults && (
                     <>
+                        {/* Duplicate Warning */}
+                        {qualityCheckResults.files &&
+                            qualityCheckResults.files.length === 1 &&
+                            qualityCheckResults.files[0].potential_duplicates &&
+                            qualityCheckResults.files[0].potential_duplicates.length > 0 && (
+                                <div className="warning-alert" style={{
+                                    background: 'rgba(245, 158, 11, 0.1)',
+                                    border: '1px solid #f59e0b',
+                                    borderRadius: '6px',
+                                    padding: '1rem',
+                                    marginBottom: '1rem',
+                                    color: '#fbbf24'
+                                }}>
+                                    <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        ⚠️ Potential Duplicates Detected
+                                    </h3>
+                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#d1d5db' }}>
+                                        This document has high semantic similarity with the following files:
+                                    </p>
+                                    <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                        {qualityCheckResults.files[0].potential_duplicates.map((dup, idx) => (
+                                            <div key={idx} style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                border: '1px solid #ef4444',
+                                                borderRadius: '6px',
+                                                padding: '0.75rem',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}>
+                                                <span style={{ color: '#e5e7eb', fontSize: '0.9rem' }}>
+                                                    📄 {dup.file_name}
+                                                </span>
+                                                <span style={{
+                                                    background: dup.similarity >= 99 ? '#dc2626' : dup.similarity >= 97 ? '#ea580c' : '#f59e0b',
+                                                    color: 'white',
+                                                    padding: '0.25rem 0.75rem',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {dup.similarity}% Match
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                             <Button variant="secondary" onClick={clearResults}>
                                 Clear Results

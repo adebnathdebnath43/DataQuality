@@ -1,0 +1,119 @@
+{
+  "processed_at": "2025-12-02T00:36:14.634589Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:36:06.415434Z",
+      "document_type": "Programming tutorial or reference",
+      "summary": "This document provides an introduction to Python programming, covering topics such as data types, variables, operators, basic I/O, loops, functions, and mathematical operations. It also explains Python's dynamic typing and presents code snippets to illustrate various concepts.",
+      "context": "The purpose of this document is to serve as a learning resource for individuals interested in Python programming. It may be used for self-study, as a reference, or as part of a structured course.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Variables",
+          "Operators",
+          "Input/Output",
+          "Loops",
+          "Functions",
+          "Mathematical operations"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "Dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "True",
+          "False",
+          "Input/Output",
+          "Loops",
+          "Functions",
+          "Mathematical operations"
+        ],
+        "other": {
+          "python_version": "Not specified"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers essential Python programming concepts. However, it lacks some context and real-world examples, and the code snippets could be improved with comments and explanations for better clarity."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:36:14.634589Z",
+      "document_type": "Python programming tutorial",
+      "summary": "This document is a Python programming tutorial that covers basic Python concepts such as data types, variables, loops, and mathematical operations. It also introduces some built-in Python functions and libraries, like the math and random libraries.",
+      "context": "The purpose of this document is to provide a beginner's tutorial for Python programming, focusing on fundamental concepts and some practical examples.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "variables",
+          "loops",
+          "mathematical operations",
+          "Python built-in functions",
+          "Python libraries"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "loops",
+          "functions",
+          "mathematical operations",
+          "random",
+          "math"
+        ],
+        "other": {
+          "identifier_rules": "Rules for defining identifiers in Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document content appears well-structured and clear. However, the absence of context or examples for some of the topics could make it difficult for beginners to fully grasp certain concepts."
+    }
+  ]
+}

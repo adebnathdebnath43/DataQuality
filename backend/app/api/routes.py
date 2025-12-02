@@ -207,6 +207,23 @@ async def get_file_content(
         
         print(f"[ROUTE] /file-content called with bucket={bucket}, key={key}, region={region}")
         result = await metadata_service.get_file_content(bucket, key, region, access_key, secret_key, role_arn)
+        
+        # Check for duplicates if embedding exists
+        if 'embedding' in result and result['embedding']:
+            try:
+                print("[ROUTE] Checking for duplicates...")
+                all_local_results = metadata_service.get_all_local_results()
+                duplicates = metadata_service.find_duplicates(result['embedding'], all_local_results)
+                
+                # Filter out the file itself (by key or name)
+                duplicates = [d for d in duplicates if d['file_key'] != key and d['file_name'] != result.get('file_name')]
+                
+                if duplicates:
+                    print(f"[ROUTE] Found {len(duplicates)} potential duplicates")
+                    result['potential_duplicates'] = duplicates
+            except Exception as e:
+                print(f"[ROUTE] Error checking duplicates: {str(e)}")
+                
         print(f"[ROUTE] Successfully retrieved file content")
         return result
     except FileNotFoundError as e:

@@ -1,0 +1,262 @@
+{
+  "processed_at": "2025-12-02T00:41:49.485130Z",
+  "total_files": 4,
+  "successful": 4,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "quality_check_results.json",
+      "file_name": "quality_check_results.json",
+      "status": "success",
+      "processed_at": "2025-12-02T00:41:21.714417Z",
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It includes instructions on where to click, what information to enter, and how to save the new ID.",
+      "context": "The purpose of this document is to guide users through the process of creating a new digital ID for use in editable forms. It is likely used for training or instructional purposes.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID creation"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "create a new digital ID",
+          "save to file",
+          "6 digit password"
+        ],
+        "other": {
+          "password_requirement": "6 digit password"
+        }
+      },
+      "quality_score": 85,
+      "quality_notes": "The data quality is good with clear and concise instructions. However, the document lacks specific details such as names, organizations, and dates."
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:41:30.802424Z",
+      "document_type": "Programming tutorial",
+      "summary": "This document is a Python programming tutorial that covers various topics, such as data types, operators, functions, control statements, and mathematical operations. It also discusses Python's dynamic typing and provides examples of using different data types, such as integers, floats, complex numbers, booleans, strings, lists, tuples, sets, and dictionaries.",
+      "context": "The document is a Python programming tutorial that aims to teach users the basics of Python programming, including data types, operators, functions, control statements, and mathematical operations.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "operators",
+          "functions",
+          "control statements",
+          "mathematical operations"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamic typing",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "operator",
+          "function",
+          "control statement",
+          "mathematical operation"
+        ],
+        "other": {
+          "code_examples": [
+            "Loops",
+            "Functions",
+            "Conditionals",
+            "Arithmetic operations",
+            "Type conversion",
+            "String operations",
+            "List operations",
+            "Tuple operations",
+            "Set operations",
+            "Dictionary operations"
+          ]
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers various topics related to Python programming. However, some code examples are missing comments, and there are no clear explanations of some concepts."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:41:42.855497Z",
+      "document_type": "Python programming tutorial",
+      "summary": "This document contains Python programming examples, explanations of Python data types and operations, and an introduction to Python's dynamically typed nature. It also includes examples of mathematical operations, identifier rules, and built-in functions.",
+      "context": "The document appears to be a tutorial or educational resource for learning Python programming, covering basic concepts and providing examples to illustrate them.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Python data types",
+          "Python operations",
+          "Python identifier rules",
+          "Python built-in functions"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "input",
+          "for loop",
+          "range",
+          "mathematical operations",
+          "import",
+          "random",
+          "identifier rules",
+          "type casting",
+          "slice operator"
+        ],
+        "other": {
+          "python_data_types": [
+            "int",
+            "float",
+            "complex",
+            "bool",
+            "str",
+            "bytes",
+            "bytearray",
+            "range",
+            "list",
+            "tuple",
+            "set",
+            "frozenset",
+            "dict",
+            "None"
+          ],
+          "python_keywords": [
+            "True",
+            "False",
+            "None",
+            "and",
+            "or",
+            "not",
+            "is",
+            "if",
+            "else",
+            "elif",
+            "while",
+            "for",
+            "break",
+            "continue",
+            "return",
+            "in",
+            "yield",
+            "try",
+            "except",
+            "finally",
+            "raise",
+            "assert",
+            "import",
+            "from",
+            "as",
+            "class",
+            "def",
+            "pass",
+            "global",
+            "nonlocal",
+            "lambda",
+            "del",
+            "with"
+          ],
+          "python_built_in_functions": [
+            "print()",
+            "type()",
+            "id()",
+            "len()",
+            "math.sqrt()",
+            "math.pi",
+            "randint()"
+          ]
+        }
+      },
+      "quality_score": 85,
+      "quality_notes": "The document is well-structured and covers a range of Python programming concepts with examples. However, it lacks information about the source or author, and some examples are not directly related to the concepts being explained."
+    },
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:41:49.483108Z",
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It includes instructions on where to click and what information to enter.",
+      "context": "The purpose of this document is to guide users through the process of creating a digital signature for use in editable forms.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID creation"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "save to file",
+          "6 digit password"
+        ],
+        "other": {
+          "password_requirement": "6 digits"
+        }
+      },
+      "quality_score": 85,
+      "quality_notes": "The document is clear and concise, providing a step-by-step guide. However, it lacks specific details such as the name of the software being used, and the actual visuals of the process."
+    }
+  ]
+}

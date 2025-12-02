@@ -1,0 +1,154 @@
+{
+  "processed_at": "2025-12-01T23:49:26.936795Z",
+  "total_files": 4,
+  "successful": 4,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-01T23:49:09.077194Z",
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It details the process from clicking the signature arrow option to entering and confirming a password.",
+      "context": "The purpose of this document is to instruct users on the process of creating a new digital ID for use in editable forms, enhancing document security and authentication.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID creation",
+          "password creation"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "create a new digital ID",
+          "save to file",
+          "6 digit password"
+        ],
+        "other": {
+          "password_length": "6 digits"
+        }
+      },
+      "quality_score": 80,
+      "quality_notes": "The data quality is good with clear instructions. However, the document lacks specific details such as names of people, organizations, dates, and locations."
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-01T23:49:17.249451Z",
+      "document_type": "Programming tutorial or guide",
+      "summary": "This document is a Python programming tutorial that covers various topics, including data types, operators, loops, functions, and mathematical operations. It also discusses Python's dynamic typing and provides examples of using different data types.",
+      "context": "The purpose of this document is to provide an introduction to Python programming concepts and demonstrate how to use different features of the language through examples.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Operators",
+          "Loops",
+          "Functions",
+          "Mathematical operations"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamic typing",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "for loop",
+          "if statement",
+          "def",
+          "math module",
+          "random module"
+        ],
+        "other": {
+          "code_examples": "Multiple code examples are provided throughout the document to demonstrate different Python concepts."
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers various Python programming topics. However, some code examples lack context, and there is no clear indication of the intended audience or prerequisites for understanding the content."
+    },
+    {
+      "file_key": "unstructure_classification_test_doc1.pdf",
+      "file_name": "unstructure_classification_test_doc1.pdf",
+      "status": "success",
+      "processed_at": "2025-12-01T23:49:22.055618Z",
+      "document_type": "undefined",
+      "summary": "This document is associated with an individual named Addy who has an email address abcd@mail.com. The document does not provide further details.",
+      "context": "The purpose of this document is unclear without additional information.",
+      "metadata": {
+        "people": [
+          "Addy"
+        ],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [],
+        "emails": [
+          "abcd@mail.com"
+        ],
+        "phones": [],
+        "keywords": [],
+        "other": {}
+      },
+      "quality_score": 30,
+      "quality_notes": "The data quality is poor due to lack of information. The document provides minimal context and no clear purpose."
+    },
+    {
+      "file_key": "unstructure_classification_test_doc2.pdf",
+      "file_name": "unstructure_classification_test_doc2.pdf",
+      "status": "success",
+      "processed_at": "2025-12-01T23:49:26.936795Z",
+      "document_type": "unidentified",
+      "summary": "The document is a brief statement that declares the document belongs to everyone. The content is too minimal to provide further details.",
+      "context": "The purpose of this document is unclear without additional context, as it only states that the document belongs to everyone.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "ownership"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "everyone",
+          "document"
+        ],
+        "other": {}
+      },
+      "quality_score": 20,
+      "quality_notes": "The data quality is low due to the lack of substantial content and minimal context provided in the document."
+    }
+  ]
+}

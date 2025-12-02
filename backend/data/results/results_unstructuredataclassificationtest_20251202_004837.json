@@ -1,0 +1,89 @@
+{
+  "processed_at": "2025-12-02T00:48:37.785007Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:48:30.470931Z",
+      "document_type": "Programming tutorial",
+      "summary": "This document contains Python programming examples, covering various topics such as loops, data types, arithmetic operations, and built-in functions. It also explains identifier rules, keywords, and type casting.",
+      "context": "The document appears to be a Python programming tutorial, intended for teaching or learning purposes. It includes examples and explanations of different programming concepts.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Loops",
+          "Data types",
+          "Arithmetic operations",
+          "Built-in functions",
+          "Identifier rules",
+          "Keywords",
+          "Type casting"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "loops",
+          "data types",
+          "arithmetic operations",
+          "built-in functions",
+          "identifier rules",
+          "keywords",
+          "type casting"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The data quality is good, with clear explanations and examples. However, there is no mention of the intended audience or author, and some topics could be explained in more depth."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:48:37.779247Z",
+      "document_type": "Python programming tutorial",
+      "summary": "This document is a Python programming tutorial that covers various topics such as data types, type conversion, mathematical operations, and identifiers. It also includes examples of code snippets for better understanding.",
+      "context": "The purpose of this document is to provide a comprehensive guide to Python programming concepts for beginners. It can be used as a learning resource or as a reference for those who want to brush up on their Python skills.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Type conversion",
+          "Mathematical operations",
+          "Identifiers"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "Programming",
+          "Tutorial",
+          "Data types",
+          "Type conversion",
+          "Mathematical operations",
+          "Identifiers"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers important Python programming concepts. However, it lacks information on some advanced topics and does not include any examples of real-world applications."
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "processed_at": "2025-12-02T00:14:29.209251Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:14:22.249227Z",
+      "document_type": "Programming tutorial",
+      "summary": "This document contains Python programming examples, explanations of data types, and various operations. It includes code snippets demonstrating concepts like loops, conditionals, functions, and mathematical operations.",
+      "context": "The document appears to be a tutorial or guide for learning Python programming, with examples and explanations of various programming concepts and constructs.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Loops",
+          "Conditionals",
+          "Functions",
+          "Mathematical operations"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "input",
+          "for loop",
+          "if statement",
+          "def",
+          "math",
+          "random",
+          "identifier"
+        ],
+        "other": {
+          "programming_constructs": [
+            "Loops",
+            "Conditionals",
+            "Functions"
+          ],
+          "python_libraries": [
+            "math",
+            "random"
+          ]
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and contains clear examples of various Python programming concepts. However, it lacks information about the author, date, or any specific purpose for the content."
+    },
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:14:29.204806Z",
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It details the process of configuring a new digital signature, including the input of personal information and password creation.",
+      "context": "The document serves as a tutorial or guide for individuals who need to create a digital signature in editable forms, possibly for security or authentication purposes.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID configuration"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "create a new digital ID",
+          "save to file",
+          "6 digit password"
+        ],
+        "other": {
+          "password_requirement": "6 digit password"
+        }
+      },
+      "quality_score": 85,
+      "quality_notes": "The data quality is good, with clear and concise instructions. However, the lack of specific details such as person names, organizations, and dates results in a slightly lower quality score."
+    }
+  ]
+}

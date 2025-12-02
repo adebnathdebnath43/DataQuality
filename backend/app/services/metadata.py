@@ -83,6 +83,37 @@ class MetadataService:
             print(f"Logging failed: {e}")
         print(msg)
 
+    def _cosine_similarity(self, v1: List[float], v2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors"""
+        if not v1 or not v2 or len(v1) != len(v2):
+            return 0.0
+        
+        dot_product = sum(a*b for a,b in zip(v1, v2))
+        magnitude1 = sum(a*a for a in v1) ** 0.5
+        magnitude2 = sum(b*b for b in v2) ** 0.5
+        
+        if magnitude1 == 0 or magnitude2 == 0:
+            return 0.0
+            
+        return dot_product / (magnitude1 * magnitude2)
+
+    def find_duplicates(self, target_embedding: List[float], all_results: List[Dict[str, Any]], threshold: float = 0.95) -> List[Dict[str, Any]]:
+        """Find duplicate documents based on embedding similarity"""
+        duplicates = []
+        for result in all_results:
+            if 'embedding' in result and result['embedding']:
+                similarity = self._cosine_similarity(target_embedding, result['embedding'])
+                if similarity >= threshold:
+                    duplicates.append({
+                        "file_name": result.get('file_name', 'Unknown'),
+                        "similarity": round(similarity * 100, 2),
+                        "file_key": result.get('file_key', '')
+                    })
+        
+        # Sort by similarity (highest first)
+        duplicates.sort(key=lambda x: x['similarity'], reverse=True)
+        return duplicates
+
     async def process_files(self, bucket: str, file_keys: List[str], region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, model_id: str = None) -> List[Dict[str, Any]]:
         self._log(f"Processing {len(file_keys)} files from bucket {bucket}")
         results = []
@@ -141,12 +172,42 @@ class MetadataService:
                 )
                 self._log("Bedrock analysis complete")
                 
+                # 3.5 Generate Embedding
+                embedding = []
+                try:
+                    # Create text to embed: Summary + Topics
+                    summary = analysis.get("summary", "")
+                    topics_raw = analysis.get("metadata", {}).get("topics", [])
+                    
+                    # Handle both string and array formats from Mistral
+                    if isinstance(topics_raw, str):
+                        topics = topics_raw
+                    elif isinstance(topics_raw, list):
+                        topics = ", ".join(topics_raw)
+                    else:
+                        topics = ""
+                    
+                    text_to_embed = f"Summary: {summary}\nTopics: {topics}"
+                    
+                    self._log("Generating embedding...")
+                    embedding = self.bedrock_service.get_embedding(
+                        text=text_to_embed,
+                        region=region,
+                        access_key=access_key,
+                        secret_key=secret_key,
+                        role_arn=role_arn
+                    )
+                    self._log(f"Embedding generated. Length: {len(embedding)}")
+                except Exception as embed_err:
+                    self._log(f"Embedding generation failed: {str(embed_err)}")
+
                 # 4. Store analysis as individual JSON file
                 file_analysis = {
                     "file_key": key,
                     "file_name": file_name,
                     "status": "success",
                     "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                    "embedding": embedding,
                     **analysis
                 }
                 
@@ -284,6 +345,29 @@ class MetadataService:
             
         with open(filepath, 'r') as f:
             return json.load(f)
+
+    def get_all_local_results(self) -> List[Dict[str, Any]]:
+        """Get all local results with full content (including embeddings)"""
+        import os
+        import glob
+        
+        local_dir = "data/results"
+        if not os.path.exists(local_dir):
+            return []
+            
+        results = []
+        for filepath in glob.glob(f"{local_dir}/*.json"):
+            try:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                    # Flatten if it's a consolidated result
+                    if 'files' in data and isinstance(data['files'], list):
+                        results.extend(data['files'])
+                    else:
+                        results.append(data)
+            except Exception:
+                continue
+        return results
 
     async def get_file_content(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> Dict[str, Any]:
         self._log(f"get_file_content called for bucket={bucket}, key={key}")

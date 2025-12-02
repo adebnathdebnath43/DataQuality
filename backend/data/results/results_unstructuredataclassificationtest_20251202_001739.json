@@ -1,0 +1,105 @@
+{
+  "processed_at": "2025-12-02T00:17:39.969354Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:17:32.673119Z",
+      "document_type": "Programming tutorial or reference",
+      "summary": "This document contains Python programming examples, covering various topics such as loops, data types, operations, built-in functions, and more. It also provides information on Python's dynamic typing and representations of different values.",
+      "context": "The purpose of this document is to serve as a tutorial or reference for Python programming concepts, helping users understand how to write and execute Python code.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Loops",
+          "Data types",
+          "Operations",
+          "Built-in functions",
+          "Dynamic typing",
+          "Value representation"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "Loops",
+          "Data types",
+          "Integer",
+          "Float",
+          "Complex",
+          "Boolean",
+          "String",
+          "Bytes",
+          "Bytearray",
+          "Range",
+          "List",
+          "Tuple",
+          "Set",
+          "Frozenset",
+          "Dict",
+          "None",
+          "Operations",
+          "Built-in functions",
+          "Dynamic typing",
+          "Value representation"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document provides clear and detailed information on Python programming concepts, with examples. However, it lacks information on the author, creation date, and any specific purpose or context for the provided code examples."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T00:17:39.969354Z",
+      "document_type": "Python programming tutorial",
+      "summary": "This document contains Python programming language code snippets and explanations. It covers topics like loops, data types, operations, and built-in functions. Additionally, it explains identifier rules, keywords, and error messages.",
+      "context": "This document is used for learning or teaching Python programming concepts. It provides examples and explanations to understand various Python programming constructs.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "loops",
+          "data types",
+          "operations",
+          "built-in functions",
+          "identifier rules",
+          "keywords",
+          "error messages"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "loops",
+          "data types",
+          "operations",
+          "built-in functions",
+          "identifier rules",
+          "keywords",
+          "error messages"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 85,
+      "quality_notes": "The document contains well-structured Python code examples and explanations. However, it lacks information about the author, creation date, and purpose. The document could be improved by adding context and background information."
+    }
+  ]
+}

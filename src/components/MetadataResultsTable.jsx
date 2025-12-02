@@ -69,6 +69,17 @@ const MetadataResultsTable = ({ results }) => {
         if (!metadata || !metadata[field]) return '-';
 
         const value = metadata[field];
+
+        // Handle empty strings
+        if (typeof value === 'string' && value.trim() === '') return '-';
+
+        // Handle string values (Mistral sometimes returns strings instead of arrays)
+        if (typeof value === 'string') {
+            const truncated = value.length > 50 ? value.substring(0, 50) + '...' : value;
+            return <span title={value}>{truncated}</span>;
+        }
+
+        // Handle arrays
         if (Array.isArray(value)) {
             if (value.length === 0) return '-';
             if (value.length <= 2) {
@@ -80,6 +91,7 @@ const MetadataResultsTable = ({ results }) => {
                 </span>
             );
         }
+
         return String(value);
     };
 

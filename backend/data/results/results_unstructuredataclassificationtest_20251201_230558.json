@@ -1,0 +1,49 @@
+{
+  "processed_at": "2025-12-01T23:05:58.594964Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-01T23:05:58.572447Z",
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It includes instructions on where to find the signature option, how to configure a new digital ID, and the process of saving it to a file.",
+      "context": "The document serves as a tutorial or guide for users who need to create a digital signature in editable forms, possibly for secure document signing or authentication purposes.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID",
+          "security",
+          "authentication"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "create a new digital ID",
+          "save to file",
+          "password"
+        ],
+        "other": {
+          "password_length": "6 digits"
+        }
+      },
+      "quality_score": 80,
+      "quality_notes": "The data quality is good, with clear and concise instructions. However, the lack of specific examples or visuals could impact the clarity for some users. No major issues were found."
+    }
+  ]
+}

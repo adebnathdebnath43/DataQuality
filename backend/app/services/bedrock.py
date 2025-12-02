@@ -213,3 +213,27 @@ class BedrockService:
                 "summary": "Analysis failed",
                 "error": str(e)
             }
+
+    def get_embedding(self, text: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> List[float]:
+        """
+        Generate embedding for text using Titan Embeddings v1.
+        """
+        client = self._get_client(region, access_key, secret_key, role_arn)
+        model_id = "amazon.titan-embed-text-v1"
+        
+        try:
+            body = json.dumps({
+                "inputText": text
+            })
+            
+            response = client.invoke_model(
+                modelId=model_id,
+                body=body
+            )
+            
+            response_body = json.loads(response['body'].read())
+            return response_body['embedding']
+            
+        except Exception as e:
+            print(f"Error generating embedding: {str(e)}")
+            return []
