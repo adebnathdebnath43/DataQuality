@@ -190,6 +190,18 @@ const MetadataResultsTable = ({ results }) => {
                                     </span>
                                 </div>
                             </th>
+                            <th>
+                                <div className="quality-score-header">
+                                    Similarity
+                                    <span className="info-icon">ℹ️</span>
+                                    <span className="tooltip">
+                                        Cosine similarity with other documents.
+                                        <br />• 95-96%: Similar
+                                        <br />• 97-98%: Very Similar
+                                        <br />• 99%+: Nearly Identical
+                                    </span>
+                                </div>
+                            </th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -228,6 +240,32 @@ const MetadataResultsTable = ({ results }) => {
                                             <span className={`quality-score score-${Math.floor(file.quality_score / 20)}`}>
                                                 {file.quality_score}
                                             </span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        {file.potential_duplicates && file.potential_duplicates.length > 0 ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                {file.potential_duplicates.slice(0, 3).map((dup, idx) => (
+                                                    <span key={idx} style={{
+                                                        background: dup.similarity >= 99 ? '#dc2626' : dup.similarity >= 97 ? '#ea580c' : '#f59e0b',
+                                                        color: 'white',
+                                                        padding: '0.15rem 0.5rem',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 'bold',
+                                                        textAlign: 'center'
+                                                    }}>
+                                                        {dup.similarity}%
+                                                    </span>
+                                                ))}
+                                                {file.potential_duplicates.length > 3 && (
+                                                    <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+                                                        +{file.potential_duplicates.length - 3} more
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span style={{ color: '#6b7280' }}>-</span>
                                         )}
                                     </td>
                                     <td>

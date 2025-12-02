@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8002/api';
+// IMPORTANT: Port 8003 is the ONLY correct backend port
+// Changed to 8003 to bypass browser cache issues
+export const API_URL = 'http://localhost:8003/api';
 
 const api = axios.create({
     baseURL: API_URL,

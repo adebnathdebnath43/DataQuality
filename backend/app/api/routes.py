@@ -263,17 +263,80 @@ async def scan_results(
 
 @router.get("/history")
 async def list_history():
-    """List all local history files"""
+    """List all local history files with duplicate detection"""
     try:
-        return metadata_service.list_local_history()
+        history_files = metadata_service.list_local_history()
+        
+        # Get all results with embeddings for duplicate detection
+        all_results = metadata_service.get_all_local_results()
+        
+        # Add duplicate information to each history file
+        for history_file in history_files:
+            try:
+                # Load the full content of this history file
+                content = metadata_service.get_local_history_content(history_file['filename'])
+                
+                # Get files from this history entry
+                files = content.get('files', [])
+                
+                # Find duplicates for each file in this history
+                duplicates_info = []
+                for file_data in files:
+                    if 'embedding' in file_data and file_data['embedding']:
+                        # Find duplicates for this file
+                        dups = metadata_service.find_duplicates(
+                            file_data['embedding'], 
+                            all_results,
+                            threshold=0.95
+                        )
+                        # Filter out self
+                        dups = [d for d in dups if d['file_name'] != file_data.get('file_name')]
+                        if dups:
+                            duplicates_info.extend(dups)
+                
+                # Add unique duplicates to history entry
+                if duplicates_info:
+                    # Get unique duplicates by file_name
+                    unique_dups = {d['file_name']: d for d in duplicates_info}.values()
+                    history_file['duplicates'] = list(unique_dups)
+                    history_file['has_duplicates'] = True
+                    history_file['max_similarity'] = max(d['similarity'] for d in unique_dups)
+                else:
+                    history_file['has_duplicates'] = False
+                    
+            except Exception as e:
+                print(f"Error processing duplicates for {history_file['filename']}: {str(e)}")
+                history_file['has_duplicates'] = False
+        
+        return history_files
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/history/{filename}")
 async def get_history_content(filename: str):
-    """Get content of a specific history file"""
+    """Get content of a specific history file with duplicate detection"""
     try:
-        return metadata_service.get_local_history_content(filename)
+        content = metadata_service.get_local_history_content(filename)
+        
+        # Get all results for duplicate detection
+        all_results = metadata_service.get_all_local_results()
+        
+        # Add duplicate information to each file
+        if 'files' in content and isinstance(content['files'], list):
+            for file_data in content['files']:
+                if 'embedding' in file_data and file_data['embedding']:
+                    # Find duplicates for this file
+                    duplicates = metadata_service.find_duplicates(
+                        file_data['embedding'],
+                        all_results,
+                        threshold=0.95
+                    )
+                    # Filter out self
+                    duplicates = [d for d in duplicates if d['file_name'] != file_data.get('file_name')]
+                    if duplicates:
+                        file_data['potential_duplicates'] = duplicates
+        
+        return content
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 

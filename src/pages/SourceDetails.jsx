@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import MetadataResultsTable from '../components/MetadataResultsTable';
-import { listFiles, listHistory, getHistoryContent } from '../services/api';
+import { listFiles, listHistory, getHistoryContent, API_URL } from '../services/api';
 import './SourceDetails.css';
 
 const SourceDetails = () => {
@@ -405,25 +405,58 @@ const SourceDetails = () => {
                                 {historyFiles.length === 0 ? (
                                     <p style={{ color: '#94a3b8' }}>No history files found.</p>
                                 ) : (
-                                    <div className="history-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    <div className="history-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                         {historyFiles.map(file => (
                                             <div key={file.filename}
                                                 onClick={() => loadHistoryFile(file.filename)}
                                                 style={{
-                                                    padding: '1rem', background: '#0f172a', borderRadius: '6px',
-                                                    cursor: 'pointer', border: '1px solid #334155',
-                                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                                    padding: '1rem',
+                                                    background: file.has_duplicates ? 'rgba(239, 68, 68, 0.1)' : '#0f172a',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    border: file.has_duplicates ? '1px solid #ef4444' : '1px solid #334155',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '0.5rem'
                                                 }}
-                                                onMouseOver={e => e.currentTarget.style.borderColor = '#3b82f6'}
-                                                onMouseOut={e => e.currentTarget.style.borderColor = '#334155'}
+                                                onMouseOver={e => e.currentTarget.style.borderColor = file.has_duplicates ? '#dc2626' : '#3b82f6'}
+                                                onMouseOut={e => e.currentTarget.style.borderColor = file.has_duplicates ? '#ef4444' : '#334155'}
                                             >
-                                                <div>
-                                                    <div style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{new Date(file.created_at).toLocaleString()}</div>
-                                                    <div style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-                                                        {file.total_files} files • {file.successful} success • {file.failed} failed
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <div style={{ color: '#e2e8f0', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            {new Date(file.created_at).toLocaleString()}
+                                                            {file.has_duplicates && (
+                                                                <span style={{
+                                                                    background: file.max_similarity >= 99 ? '#dc2626' : file.max_similarity >= 97 ? '#ea580c' : '#f59e0b',
+                                                                    color: 'white',
+                                                                    padding: '0.15rem 0.5rem',
+                                                                    borderRadius: '8px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    ⚠️ {file.max_similarity}% Duplicate
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+                                                            {file.total_files} files • {file.successful} success • {file.failed} failed
+                                                        </div>
                                                     </div>
+                                                    <div style={{ color: '#3b82f6' }}>View →</div>
                                                 </div>
-                                                <div style={{ color: '#3b82f6' }}>View →</div>
+
+                                                {file.has_duplicates && file.duplicates && (
+                                                    <div style={{
+                                                        fontSize: '0.8rem',
+                                                        color: '#9ca3af',
+                                                        paddingTop: '0.5rem',
+                                                        borderTop: '1px solid rgba(255,255,255,0.1)'
+                                                    }}>
+                                                        Similar to: {file.duplicates.slice(0, 3).map(d => d.file_name).join(', ')}
+                                                        {file.duplicates.length > 3 && ` +${file.duplicates.length - 3} more`}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -573,6 +606,21 @@ const SourceDetails = () => {
                     </>
                 )}
             </section>
+            {/* Debug Info */}
+            <div style={{
+                position: 'fixed',
+                bottom: '10px',
+                right: '10px',
+                background: 'rgba(0,0,0,0.7)',
+                color: '#0f0',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                pointerEvents: 'none',
+                zIndex: 9999
+            }}>
+                Backend: {API_URL}
+            </div>
         </div>
     );
 };

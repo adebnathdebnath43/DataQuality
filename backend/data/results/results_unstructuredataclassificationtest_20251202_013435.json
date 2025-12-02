@@ -1,0 +1,17 @@
+{
+  "processed_at": "2025-12-02T01:34:35.422549Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "anthropic.claude-opus-4-5-20251101-v1:0",
+  "files": [
+    {
+      "file_key": "quality_check_results.json",
+      "file_name": "quality_check_results.json",
+      "status": "success",
+      "processed_at": "2025-12-02T01:34:35.418641Z",
+      "summary": "Analysis failed",
+      "error": "An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-opus-4-5-20251101-v1:0 with on-demand throughput isn\u2019t supported. Retry your request with the ID or ARN of an inference profile that contains this model."
+    }
+  ]
+}

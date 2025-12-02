@@ -1,0 +1,112 @@
+{
+  "processed_at": "2025-12-02T02:14:52.692389Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T02:14:45.131567Z",
+      "embedding": [],
+      "document_type": "Programming tutorial",
+      "summary": "This document contains Python programming examples, data types, operators, and functions. It also covers Python's built-in functions, mathematical operations, and identifier rules.",
+      "context": "The document appears to be a Python programming tutorial, providing examples of various Python concepts for learning and practice purposes.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Operators",
+          "Functions",
+          "Mathematical operations",
+          "Identifier rules"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "Programming",
+          "Data types",
+          "Operators",
+          "Functions",
+          "Mathematical operations",
+          "Identifier rules",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The data quality is high, with clear examples and explanations. However, there is no mention of people, locations, organizations, dates, emails, or phone numbers."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T02:14:52.691351Z",
+      "embedding": [],
+      "document_type": "Python programming tutorial",
+      "summary": "The document contains Python programming examples, explanations of Python data types, and mathematical operations. It also includes information on Python keywords, built-in functions, and identifier rules.",
+      "context": "This document appears to be a Python programming tutorial or guide for beginners, covering various aspects of the Python language such as data types, mathematical operations, keywords, and built-in functions.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "mathematical operations",
+          "keywords",
+          "built-in functions",
+          "identifier rules"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "mathematical operations",
+          "identifier rules"
+        ],
+        "other": {}
+      },
+      "quality_score": 85,
+      "quality_notes": "The document contains clear examples and explanations of Python programming concepts. However, some sections might benefit from better formatting and organization. There are also some inconsistencies in the code indentation."
+    }
+  ]
+}

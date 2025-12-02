@@ -1,0 +1,110 @@
+{
+  "processed_at": "2025-12-02T01:43:25.226633Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T01:43:16.917341Z",
+      "document_type": "programming tutorial",
+      "summary": "This document is a Python programming tutorial that covers various topics such as data types, variables, operators, functions, control flow, loops, and mathematical operations. It also discusses Python's dynamic typing feature and provides examples of type conversion and casting.",
+      "context": "The purpose of this document is to provide a comprehensive guide for beginners to learn Python programming concepts and techniques. It can be used for self-study or as a reference material in a classroom setting.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "variables",
+          "operators",
+          "functions",
+          "control flow",
+          "loops",
+          "mathematical operations",
+          "type conversion",
+          "type casting"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "True",
+          "False",
+          "type conversion",
+          "type casting",
+          "mathematical operations"
+        ],
+        "other": {
+          "identifier_rules": "Rules for defining identifiers in Python"
+        }
+      },
+      "quality_score": 95,
+      "quality_notes": "The document is well-structured and covers a wide range of Python programming topics. However, some sections are repetitive, and there are some formatting inconsistencies."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T01:43:25.217239Z",
+      "document_type": "Python programming tutorial",
+      "summary": "The document is a Python programming tutorial that covers various topics such as data types, type casting, mathematical operations, and basic programming constructs like loops and conditionals. It also provides examples of using built-in Python functions and libraries like math and random.",
+      "context": "The document is a Python programming tutorial intended for beginners who want to learn the basics of Python programming. It provides examples and exercises that demonstrate various programming concepts and techniques.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "type casting",
+          "mathematical operations",
+          "loops",
+          "conditionals",
+          "built-in functions",
+          "math library",
+          "random library"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "programming",
+          "tutorial",
+          "data types",
+          "type casting",
+          "mathematical operations",
+          "loops",
+          "conditionals",
+          "built-in functions",
+          "math library",
+          "random library"
+        ],
+        "other": {}
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers a wide range of Python programming topics. However, some of the examples provided are not very practical or relevant to real-world programming scenarios. Additionally, the document could benefit from more detailed explanations of some of the more complex concepts and techniques."
+    }
+  ]
+}

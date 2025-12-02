@@ -1,0 +1,100 @@
+{
+  "processed_at": "2025-12-02T01:12:09.021418Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T01:12:01.490673Z",
+      "document_type": "programming tutorial",
+      "summary": "This document contains Python programming language concepts, code examples, and explanations of data types, operations, and functions. It also covers topics like type casting, mathematical operations, and identifiers.",
+      "context": "The purpose of this document is to provide a comprehensive tutorial on Python programming concepts and demonstrate their usage with code examples.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "type casting",
+          "mathematical operations",
+          "identifiers",
+          "code examples"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "type conversion",
+          "mathematical operations",
+          "identifiers"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers various Python programming concepts. However, it could benefit from better formatting and consistent use of indentation in code examples."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-02T01:12:09.015816Z",
+      "document_type": "Python programming tutorial",
+      "summary": "This document contains Python programming examples covering various topics such as loops, data types, operations, and built-in functions. It also discusses Python identifier rules and reserved keywords.",
+      "context": "The purpose of this document is to provide a tutorial on Python programming concepts with examples, which can be used for learning or teaching purposes.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Loops",
+          "Data types",
+          "Operations",
+          "Built-in functions",
+          "Identifier rules",
+          "Reserved keywords"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "Loops",
+          "Data types",
+          "Operations",
+          "Built-in functions",
+          "Identifier rules",
+          "Reserved keywords"
+        ],
+        "other": {
+          "programming_language": "Python"
+        }
+      },
+      "quality_score": 90,
+      "quality_notes": "The document is well-structured and covers various Python programming topics with examples. However, it lacks information on the source or author, and some examples could be better explained."
+    }
+  ]
+}
