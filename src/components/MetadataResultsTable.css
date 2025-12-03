@@ -147,6 +147,7 @@
 
 .expanded-metadata {
     padding: 1.5rem;
+    overflow-x: hidden;
 }
 
 .metadata-grid {
@@ -178,6 +179,8 @@
     margin-bottom: 0.5rem;
     color: var(--text-secondary);
     font-size: 0.85rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .full-text-sections {
@@ -205,6 +208,8 @@
     background: var(--bg-primary);
     padding: 1rem;
     border-radius: 6px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 @media (max-width: 768px) {
