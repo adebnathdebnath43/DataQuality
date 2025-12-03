@@ -1,0 +1,142 @@
+{
+  "processed_at": "2025-12-03T12:48:46.359901Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:48:35.749886Z",
+      "embedding": [],
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It includes instructions on where to find the signature option, how to configure a new digital ID, and how to save it to a file.",
+      "context": "The purpose of this document is to instruct users on the process of creating a new digital ID for use in editable forms, enhancing document security and authenticity.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID",
+          "security"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "create a new digital ID",
+          "save to file",
+          "password"
+        ],
+        "other": {
+          "password_length": "6 digits"
+        }
+      },
+      "quality_score": 80,
+      "quality_notes": "The document provides clear instructions but lacks specific details such as the software being used. The 'email ID' and 'country' mentioned are placeholders and not actual data."
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:48:46.357890Z",
+      "embedding": [],
+      "document_type": "Python programming tutorial",
+      "summary": "This document provides an introduction to Python programming, including basic concepts such as data types, variables, loops, functions, and mathematical operations. It also covers more advanced topics such as type casting, slice operator, and Python built-in functions.",
+      "context": "The purpose of this document is to provide a comprehensive guide for beginners to learn Python programming. It includes various examples and exercises to help users understand the concepts better.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "data types",
+          "variables",
+          "loops",
+          "functions",
+          "mathematical operations",
+          "type casting",
+          "slice operator",
+          "Python built-in functions"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "dynamically typed programming language",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "for loop",
+          "while loop",
+          "if-else statement",
+          "functions",
+          "mathematical operations",
+          "type casting",
+          "slice operator"
+        ],
+        "other": {
+          "Python_keywords": [
+            "True",
+            "False",
+            "None",
+            "and",
+            "or",
+            "not",
+            "is",
+            "if",
+            "else",
+            "elif",
+            "while",
+            "for",
+            "break",
+            "continue",
+            "return",
+            "in",
+            "yield",
+            "try",
+            "except",
+            "finally",
+            "raise",
+            "assert",
+            "import",
+            "from",
+            "as",
+            "class",
+            "def",
+            "pass",
+            "global",
+            "nonlocal",
+            "lambda",
+            "del",
+            "with"
+          ]
+        }
+      },
+      "quality_score": 95,
+      "quality_notes": "The document is well-structured and covers a wide range of topics related to Python programming. However, some examples and exercises could be improved for better clarity."
+    }
+  ]
+}

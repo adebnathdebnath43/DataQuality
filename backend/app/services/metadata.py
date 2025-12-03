@@ -83,6 +83,29 @@ class MetadataService:
             print(f"Logging failed: {e}")
         print(msg)
 
+    def _validate_dimensions(self, dimensions: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate and ensure all 17 dimensions are present with valid scores"""
+        required_dimensions = [
+            "Accuracy", "Completeness", "Consistency", "Timeliness", "Validity",
+            "Uniqueness", "Reliability", "Relevance", "Accessibility", "Precision",
+            "Integrity", "Conformity", "Interpretability", "Traceability",
+            "Credibility", "Fitness_for_Use", "Value"
+        ]
+        
+        validated = {}
+        for dim in required_dimensions:
+            if dim in dimensions and isinstance(dimensions[dim], dict):
+                score = dimensions[dim].get("score", 50)
+                evidence = dimensions[dim].get("evidence", "Not assessed")
+                # Ensure score is valid (0-100)
+                score = max(0, min(100, int(score)))
+                validated[dim] = {"score": score, "evidence": evidence}
+            else:
+                # Default for missing dimensions
+                validated[dim] = {"score": 50, "evidence": "Dimension not assessed by LLM"}
+        
+        return validated
+
     def _cosine_similarity(self, v1: List[float], v2: List[float]) -> float:
         """Calculate cosine similarity between two vectors"""
         if not v1 or not v2 or len(v1) != len(v2):
@@ -201,6 +224,19 @@ class MetadataService:
                 except Exception as embed_err:
                     self._log(f"Embedding generation failed: {str(embed_err)}")
 
+                # 3.6 Validate and extract dimensions
+                dimensions = {}
+                overall_quality_score = analysis.get("overall_quality_score", analysis.get("quality_score", 50))
+                recommended_action = analysis.get("recommended_action", "REVIEW")
+                
+                if "dimensions" in analysis and isinstance(analysis["dimensions"], dict):
+                    dimensions = self._validate_dimensions(analysis["dimensions"])
+                    self._log(f"Validated {len(dimensions)} dimensions")
+                else:
+                    # If LLM didn't return dimensions, create defaults
+                    self._log("No dimensions in response, using defaults")
+                    dimensions = self._validate_dimensions({})
+
                 # 4. Store analysis as individual JSON file
                 file_analysis = {
                     "file_key": key,
@@ -208,6 +244,9 @@ class MetadataService:
                     "status": "success",
                     "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
                     "embedding": embedding,
+                    "overall_quality_score": overall_quality_score,
+                    "recommended_action": recommended_action,
+                    "dimensions": dimensions,
                     **analysis
                 }
                 

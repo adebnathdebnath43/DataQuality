@@ -1,39 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import QualityScoreChart from '../components/QualityScoreChart';
+import api from '../services/api';
 import './Dashboard.css';
 
 const Dashboard = () => {
-    const [connectedSources, setConnectedSources] = React.useState([]);
-    const [qualityCheckResults, setQualityCheckResults] = React.useState(null);
+    const [connectedSources, setConnectedSources] = useState([]);
+    const [dashboardMetrics, setDashboardMetrics] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const sources = JSON.parse(localStorage.getItem('connectedSources') || '[]');
         setConnectedSources(sources);
 
-        // Load quality check results from localStorage
-        if (sources.length > 0) {
-            const sourceId = sources[0].id;
-            const savedResults = localStorage.getItem(`qualityCheckResults_${sourceId}`);
-            if (savedResults) {
-                try {
-                    setQualityCheckResults(JSON.parse(savedResults));
-                } catch (e) {
-                    console.error('Error parsing saved results:', e);
-                }
-            }
-        }
+        // Fetch dashboard metrics from backend
+        fetchDashboardMetrics();
     }, []);
 
-    // Calculate stats from quality check results
-    const totalScans = qualityCheckResults?.files?.length || 0;
-    const successfulScans = qualityCheckResults?.files?.filter(f => f.status === 'success').length || 0;
-    const avgQuality = totalScans > 0
-        ? Math.round(qualityCheckResults.files.reduce((sum, f) => sum + (f.quality_score || 0), 0) / totalScans)
-        : 0;
-    const recentScans = qualityCheckResults?.files || [];
+    const fetchDashboardMetrics = async () => {
+        try {
+            const response = await api.get('/dashboard-metrics');
+            setDashboardMetrics(response.data);
+        } catch (error) {
+            console.error('Error fetching dashboard metrics:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getScoreColor = (score) => {
+        if (score >= 90) return '#10b981';
+        if (score >= 70) return '#f59e0b';
+        if (score >= 50) return '#f97316';
+        return '#ef4444';
+    };
+
+    const getActionColor = (action) => {
+        switch (action) {
+            case 'KEEP': return '#10b981';
+            case 'REVIEW': return '#f59e0b';
+            case 'QUARANTINE': return '#f97316';
+            case 'DISCARD': return '#ef4444';
+            default: return '#6b7280';
+        }
+    };
 
     return (
         <div className="dashboard fade-in">
@@ -56,152 +67,170 @@ const Dashboard = () => {
                 </div>
             </section>
 
-            <section className="stats-grid">
-                <Card title="Data Health Score">
-                    <div className={`stat-value ${avgQuality >= 80 ? 'text-gradient' : avgQuality >= 60 ? 'good' : 'warning'}`}>
-                        {avgQuality > 0 ? `${avgQuality}%` : 'N/A'}
-                    </div>
-                    <p className="stat-desc">
-                        {totalScans > 0
-                            ? `Based on ${totalScans} quality check${totalScans > 1 ? 's' : ''}`
-                            : 'Run a quality check to see your score'}
-                    </p>
-                </Card>
-                <Card title="Total Scans">
-                    <div className="stat-value">{totalScans}</div>
-                    <p className="stat-desc">Quality checks completed</p>
-                </Card>
-                <Card title="Successful Scans">
-                    <div className="stat-value text-gradient">{successfulScans}</div>
-                    <p className="stat-desc">
-                        {totalScans - successfulScans > 0
-                            ? `${totalScans - successfulScans} failed`
-                            : 'All scans successful'}
-                    </p>
-                </Card>
-            </section>
-
-            {recentScans.length > 0 && (
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                    Loading dashboard metrics...
+                </div>
+            ) : dashboardMetrics ? (
                 <>
-                    <QualityScoreChart scans={recentScans} />
+                    {/* Stats Grid */}
+                    <section className="stats-grid">
+                        <Card title="Total Files Processed">
+                            <div className="stat-value text-gradient">
+                                {dashboardMetrics.total_files_processed}
+                            </div>
+                            <p className="stat-desc">Last 7 days</p>
+                        </Card>
 
-                    <section className="recent-scans-section">
-                        <h2 className="section-title">Recent Quality Checks</h2>
-                        <div className="scans-list glass-panel">
-                            {recentScans.map((scan, index) => {
-                                const score = scan.quality_score || 0;
-                                const scoreClass = score >= 80 ? 'excellent' :
-                                    score >= 60 ? 'good' :
-                                        score >= 40 ? 'fair' : 'poor';
-                                const timeAgo = getTimeAgo(scan.processed_at);
+                        <Card title="S3 Bucket">
+                            <div className="stat-value" style={{ fontSize: '1.5rem', color: '#3b82f6' }}>
+                                {dashboardMetrics.bucket_name}
+                            </div>
+                            <p className="stat-desc">Connected source</p>
+                        </Card>
 
-                                return (
-                                    <div key={index} className="scan-item">
-                                        <div className="scan-icon">
-                                            <span className={`quality-badge ${scoreClass}`}>{score}</span>
-                                        </div>
-                                        <div className="scan-details">
-                                            <h4>{scan.file_name}</h4>
-                                            <p>{scan.summary || 'Quality check completed'} • {timeAgo}</p>
-                                        </div>
-                                        <div className={`scan-status ${scan.status}`}>
-                                            {scan.status === 'success' ? '✓' : '!'}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        <Card title="Average Quality Score">
+                            <div className="stat-value">
+                                {dashboardMetrics.last_7_days.length > 0
+                                    ? Math.round(dashboardMetrics.last_7_days.reduce((sum, day) => sum + day.avg_quality_score, 0) / dashboardMetrics.last_7_days.length)
+                                    : 0}%
+                            </div>
+                            <p className="stat-desc">Across all files</p>
+                        </Card>
                     </section>
-                </>
-            )}
 
-            {connectedSources.length > 0 && (
-                <section className="connected-sources" style={{ marginBottom: '4rem' }}>
-                    <h2 className="section-title">Connected Sources</h2>
-                    <div className="sources-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', display: 'grid', gap: '1.5rem' }}>
-                        {connectedSources.map((source) => {
-                            // Format the source name better
-                            const displayName = source.sourceName.replace(/_/g, ' ').replace(/S3 /g, 'S3: ');
-
-                            return (
-                                <Link key={source.id} to={`/source/${source.id}`} style={{ textDecoration: 'none' }}>
-                                    <Card className="source-card source-card-interactive">
-                                        <div className="source-icon" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{source.icon}</div>
-                                        <h3 className="source-name" style={{
-                                            fontSize: '1rem',
-                                            marginBottom: '0.75rem',
-                                            wordBreak: 'break-word',
-                                            lineHeight: '1.4'
-                                        }}>
-                                            {displayName}
-                                        </h3>
-                                        {source.bucket && (
+                    {/* Last 7 Days Trend */}
+                    {dashboardMetrics.last_7_days.length > 0 && (
+                        <section className="quality-trend-section">
+                            <h2 className="section-title">Quality Score Trend (Last 7 Days)</h2>
+                            <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', height: '200px' }}>
+                                    {dashboardMetrics.last_7_days.map((day, index) => (
+                                        <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                                             <div style={{
-                                                fontSize: '0.75rem',
-                                                color: 'var(--text-secondary)',
-                                                background: 'rgba(255, 255, 255, 0.05)',
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '4px',
-                                                marginBottom: '0.5rem',
-                                                fontFamily: 'monospace'
+                                                height: `${day.avg_quality_score * 2}px`,
+                                                width: '100%',
+                                                background: getScoreColor(day.avg_quality_score),
+                                                borderRadius: '4px 4px 0 0',
+                                                display: 'flex',
+                                                alignItems: 'flex-start',
+                                                justifyContent: 'center',
+                                                padding: '0.5rem 0',
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.875rem'
                                             }}>
-                                                📦 {source.bucket}
+                                                {day.avg_quality_score}
                                             </div>
-                                        )}
-                                        {source.region && (
-                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                                                🌍 {source.region}
-                                            </p>
-                                        )}
-                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                            🔗 Connected: {new Date(source.connectedAt).toLocaleDateString()}
-                                        </p>
-                                        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                            <span className="badge success" style={{
-                                                background: 'rgba(16, 185, 129, 0.2)',
-                                                color: '#10b981',
-                                                padding: '0.25rem 0.5rem',
-                                                borderRadius: '4px',
-                                                fontSize: '0.75rem'
-                                            }}>✓ Active</span>
+                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
+                                                {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                                {day.files_processed} files
+                                            </div>
                                         </div>
-                                    </Card>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </section>
-            )}
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
-            {connectedSources.length === 0 && (
-                <section style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                    <h2 style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>No Sources Connected</h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-                        Connect an S3 bucket to start monitoring your data quality
+                    {/* Average Dimension Scores */}
+                    {Object.keys(dashboardMetrics.avg_dimension_scores).length > 0 && (
+                        <section className="dimension-scores-section">
+                            <h2 className="section-title">Average Dimension Scores</h2>
+                            <div className="glass-panel" style={{ padding: '1.5rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                                    {Object.entries(dashboardMetrics.avg_dimension_scores).map(([dimName, score]) => (
+                                        <div key={dimName} style={{
+                                            background: 'rgba(15, 23, 42, 0.5)',
+                                            padding: '1rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid #334155'
+                                        }}>
+                                            <div style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                                                {dimName.replace(/_/g, ' ')}
+                                            </div>
+                                            <div style={{
+                                                fontSize: '1.5rem',
+                                                fontWeight: 'bold',
+                                                color: getScoreColor(score)
+                                            }}>
+                                                {score}/100
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Recent Files */}
+                    {dashboardMetrics.recent_files.length > 0 && (
+                        <section className="recent-files-section">
+                            <h2 className="section-title">Recent Quality Checks</h2>
+                            <div className="glass-panel">
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '2px solid #334155' }}>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>File Name</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Quality Score</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Action</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Processed</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dashboardMetrics.recent_files.map((file, index) => (
+                                            <tr key={index} style={{ borderBottom: '1px solid #334155' }}>
+                                                <td style={{ padding: '1rem', color: '#e2e8f0' }}>{file.file_name}</td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        background: getScoreColor(file.quality_score),
+                                                        color: 'white',
+                                                        padding: '0.25rem 0.75rem',
+                                                        borderRadius: '6px',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {file.quality_score}/100
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        background: getActionColor(file.recommended_action),
+                                                        color: 'white',
+                                                        padding: '0.25rem 0.75rem',
+                                                        borderRadius: '6px',
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {file.recommended_action}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
+                                                    {new Date(file.processed_at).toLocaleString()}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    )}
+                </>
+            ) : (
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                    <p style={{ color: '#94a3b8', fontSize: '1.125rem' }}>
+                        No quality check data available. Run a quality check to see metrics.
                     </p>
-                    <Link to="/connect">
-                        <Button variant="primary">Connect Your First Source</Button>
-                    </Link>
-                </section>
+                    {connectedSources.length > 0 && (
+                        <Link to={`/source/${connectedSources[0].id}`}>
+                            <Button variant="primary" style={{ marginTop: '1rem' }}>Run Quality Check</Button>
+                        </Link>
+                    )}
+                </div>
             )}
         </div>
     );
 };
-
-// Helper function to calculate time ago
-function getTimeAgo(timestamp) {
-    if (!timestamp) return 'Recently';
-    const now = new Date();
-    const then = new Date(timestamp);
-    const diffMs = now - then;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-}
 
 export default Dashboard;

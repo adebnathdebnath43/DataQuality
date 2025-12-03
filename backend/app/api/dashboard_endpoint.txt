@@ -1,0 +1,85 @@
+@router.get("/dashboard-metrics")
+async def get_dashboard_metrics():
+    """
+    Get aggregated metrics for dashboard
+    Returns last 7 days of quality check trends, dimension scores, etc.
+    """
+    try:
+        import glob
+        import datetime
+        from collections import defaultdict
+        
+        # Get all local result files from last 7 days
+        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        seven_days_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+        
+        all_files = []
+        daily_stats = defaultdict(lambda: {"count": 0, "avg_quality": 0, "total_quality": 0})
+        dimension_totals = defaultdict(int)
+        dimension_counts = defaultdict(int)
+        
+        # Read all result files
+        for filepath in glob.glob(f"{results_dir}/*.json"):
+            try:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                    
+                # Check if file is from last 7 days
+                processed_at = data.get("processed_at", "")
+                if processed_at:
+                    file_date = datetime.datetime.fromisoformat(processed_at.replace('Z', '+00:00'))
+                    if file_date >= seven_days_ago:
+                        day_key = file_date.strftime("%Y-%m-%d")
+                        
+                        # Aggregate daily stats
+                        for file_data in data.get("files", []):
+                            if file_data.get("status") == "success":
+                                daily_stats[day_key]["count"] += 1
+                                quality = file_data.get("overall_quality_score") or file_data.get("quality_score", 0)
+                                daily_stats[day_key]["total_quality"] += quality
+                                
+                                # Aggregate dimension scores
+                                if "dimensions" in file_data:
+                                    for dim_name, dim_data in file_data["dimensions"].items():
+                                        dimension_totals[dim_name] += dim_data.get("score", 0)
+                                        dimension_counts[dim_name] += 1
+                                
+                                all_files.append({
+                                    "file_name": file_data.get("file_name"),
+                                    "quality_score": quality,
+                                    "processed_at": processed_at,
+                                    "recommended_action": file_data.get("recommended_action", "REVIEW")
+                                })
+            except Exception as e:
+                print(f"Error reading {filepath}: {e}")
+                continue
+        
+        # Calculate averages
+        for day in daily_stats:
+            if daily_stats[day]["count"] > 0:
+                daily_stats[day]["avg_quality"] = round(daily_stats[day]["total_quality"] / daily_stats[day]["count"])
+        
+        # Calculate average dimension scores
+        avg_dimensions = {}
+        for dim_name in dimension_totals:
+            if dimension_counts[dim_name] > 0:
+                avg_dimensions[dim_name] = round(dimension_totals[dim_name] / dimension_counts[dim_name])
+        
+        # Sort daily stats by date
+        sorted_daily = sorted(daily_stats.items(), key=lambda x: x[0])
+        
+        return {
+            "last_7_days": [
+                {
+                    "date": day,
+                    "files_processed": stats["count"],
+                    "avg_quality_score": stats["avg_quality"]
+                }
+                for day, stats in sorted_daily
+            ],
+            "total_files_processed": sum(s["count"] for s in daily_stats.values()),
+            "avg_dimension_scores": avg_dimensions,
+            "recent_files": sorted(all_files, key=lambda x: x["processed_at"], reverse=True)[:10]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

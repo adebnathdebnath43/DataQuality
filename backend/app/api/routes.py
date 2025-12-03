@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from app.models.schemas import (
     ExtractMetadataRequest,
     ExtractMetadataResponse,
@@ -363,3 +363,265 @@ async def get_scan_history(
             detail=f"Error fetching scan history: {str(e)}"
         )
 
+@router.get("/dashboard-metrics")
+async def get_dashboard_metrics():
+    """
+    Get aggregated metrics for dashboard
+    Returns last 7 days of quality check trends, dimension scores, file details, etc.
+    """
+    try:
+        import glob
+        import datetime
+        import json
+        from collections import defaultdict
+        
+        # Get all local result files from last 7 days
+        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        seven_days_ago = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+        
+        all_files = []
+        daily_stats = defaultdict(lambda: {"count": 0, "avg_quality": 0, "total_quality": 0})
+        dimension_totals = defaultdict(int)
+        dimension_counts = defaultdict(int)
+        bucket_name = None
+        
+        # Read all result files
+        for filepath in glob.glob(f"{results_dir}/*.json"):
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    
+                # Extract bucket name from first file
+                if not bucket_name and data.get("files"):
+                    file_key = data["files"][0].get("file_key", "")
+                    if "s3://" in file_key:
+                        bucket_name = file_key.split("/")[2]
+                    
+                # Check if file is from last 7 days
+                processed_at = data.get("processed_at", "")
+                if processed_at:
+                    # Parse file date (UTC)
+                    file_date = datetime.datetime.fromisoformat(processed_at.replace('Z', '+00:00'))
+                    
+                    # Ensure seven_days_ago is timezone-aware (UTC)
+                    if seven_days_ago.tzinfo is None:
+                        seven_days_ago = seven_days_ago.replace(tzinfo=datetime.timezone.utc)
+                    
+                    # Debug logging
+                    print(f"[DEBUG] File: {filepath}, Date: {file_date}, 7 Days Ago: {seven_days_ago}")
+                    
+                    if file_date >= seven_days_ago:
+                        day_key = file_date.strftime("%Y-%m-%d")
+                        
+                        # Aggregate daily stats
+                        for file_data in data.get("files", []):
+                            if file_data.get("status") == "success":
+                                daily_stats[day_key]["count"] += 1
+                                quality = file_data.get("overall_quality_score") or file_data.get("quality_score", 0)
+                                daily_stats[day_key]["total_quality"] += quality
+                                
+                                # Aggregate dimension scores
+                                if "dimensions" in file_data:
+                                    for dim_name, dim_data in file_data["dimensions"].items():
+                                        dimension_totals[dim_name] += dim_data.get("score", 0)
+                                        dimension_counts[dim_name] += 1
+                                
+                                all_files.append({
+                                    "file_name": file_data.get("file_name"),
+                                    "file_key": file_data.get("file_key", ""),
+                                    "quality_score": quality,
+                                    "processed_at": processed_at,
+                                    "recommended_action": file_data.get("recommended_action", "REVIEW"),
+                                    "dimensions": file_data.get("dimensions", {})
+                                })
+            except Exception as e:
+                print(f"Error reading {filepath}: {e}")
+                continue
+        
+        # Calculate averages
+        for day in daily_stats:
+            if daily_stats[day]["count"] > 0:
+                daily_stats[day]["avg_quality"] = round(daily_stats[day]["total_quality"] / daily_stats[day]["count"])
+        
+        # Calculate average dimension scores
+        avg_dimensions = {}
+        for dim_name in dimension_totals:
+            if dimension_counts[dim_name] > 0:
+                avg_dimensions[dim_name] = round(dimension_totals[dim_name] / dimension_counts[dim_name])
+        
+        # Sort daily stats by date
+        sorted_daily = sorted(daily_stats.items(), key=lambda x: x[0])
+        
+        return {
+            "last_7_days": [
+                {
+                    "date": day,
+                    "files_processed": stats["count"],
+                    "avg_quality_score": stats["avg_quality"]
+                }
+                for day, stats in sorted_daily
+            ],
+            "total_files_processed": sum(s["count"] for s in daily_stats.values()),
+            "avg_dimension_scores": avg_dimensions,
+            "recent_files": sorted(all_files, key=lambda x: x["processed_at"], reverse=True)[:20],
+            "bucket_name": bucket_name or "N/A"
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/approve-dimension")
+async def approve_dimension(request: Request):
+    """Approve a specific dimension for a file"""
+    try:
+        data = await request.json()
+        file_name = data.get("file_name")
+        dimension_name = data.get("dimension_name")
+        
+        if not file_name or not dimension_name:
+            raise HTTPException(status_code=400, detail="file_name and dimension_name required")
+        
+        # Find the result file
+        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        result_file = None
+        
+        for filepath in glob.glob(f"{results_dir}/*.json"):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                result_data = json.load(f)
+                for file_data in result_data.get("files", []):
+                    if file_data.get("file_name") == file_name:
+                        result_file = filepath
+                        break
+                if result_file:
+                    break
+        
+        if not result_file:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Update the dimension approval status
+        with open(result_file, 'r', encoding='utf-8') as f:
+            result_data = json.load(f)
+        
+        for file_data in result_data.get("files", []):
+            if file_data.get("file_name") == file_name:
+                if "dimension_approvals" not in file_data:
+                    file_data["dimension_approvals"] = {}
+                file_data["dimension_approvals"][dimension_name] = {
+                    "status": "approved",
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                }
+                break
+        
+        # Save updated data
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(result_data, f, indent=2)
+        
+        return {"status": "success", "message": f"Dimension {dimension_name} approved"}
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reject-dimension")
+async def reject_dimension(request: Request):
+    """Reject a specific dimension with feedback for re-analysis"""
+    try:
+        data = await request.json()
+        file_name = data.get("file_name")
+        dimension_name = data.get("dimension_name")
+        feedback = data.get("feedback", "")
+        
+        if not file_name or not dimension_name:
+            raise HTTPException(status_code=400, detail="file_name and dimension_name required")
+        
+        # Find the result file
+        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        result_file = None
+        
+        for filepath in glob.glob(f"{results_dir}/*.json"):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                result_data = json.load(f)
+                for file_data in result_data.get("files", []):
+                    if file_data.get("file_name") == file_name:
+                        result_file = filepath
+                        break
+                if result_file:
+                    break
+        
+        if not result_file:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Update the dimension rejection status
+        with open(result_file, 'r', encoding='utf-8') as f:
+            result_data = json.load(f)
+        
+        for file_data in result_data.get("files", []):
+            if file_data.get("file_name") == file_name:
+                if "dimension_approvals" not in file_data:
+                    file_data["dimension_approvals"] = {}
+                file_data["dimension_approvals"][dimension_name] = {
+                    "status": "rejected",
+                    "feedback": feedback,
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                }
+                break
+        
+        # Save updated data
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(result_data, f, indent=2)
+        
+        return {"status": "success", "message": f"Dimension {dimension_name} rejected", "feedback": feedback}
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reanalyze-file")
+async def reanalyze_file(request: Request):
+    """Re-analyze a file with dimension-specific feedback"""
+    try:
+        data = await request.json()
+        file_key = data.get("file_key")
+        bucket = data.get("bucket")
+        region = data.get("region")
+        access_key = data.get("access_key")
+        secret_key = data.get("secret_key")
+        model_id = data.get("model_id")
+        dimension_feedback = data.get("dimension_feedback", {})  # Dict of {dimension_name: feedback}
+        
+        if not all([file_key, bucket, region, access_key, secret_key, model_id]):
+            raise HTTPException(status_code=400, detail="Missing required parameters")
+        
+        # Initialize services
+        s3_service = S3Service()
+        bedrock_service = BedrockService(region_name=region)
+        metadata_service = MetadataService(s3_service, bedrock_service)
+        
+        # Build enhanced prompt with feedback
+        feedback_prompt = ""
+        if dimension_feedback:
+            feedback_prompt = "\n\n=== USER FEEDBACK ON PREVIOUS ANALYSIS ===\n"
+            for dim_name, feedback in dimension_feedback.items():
+                feedback_prompt += f"\n{dim_name}: {feedback}"
+            feedback_prompt += "\n\nPlease re-evaluate these dimensions considering the feedback above.\n"
+        
+        # Re-analyze the file
+        result = await metadata_service.analyze_file(
+            file_key=file_key,
+            bucket=bucket,
+            region=region,
+            access_key=access_key,
+            secret_key=secret_key,
+            model_id=model_id,
+            additional_prompt=feedback_prompt
+        )
+        
+        return result
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

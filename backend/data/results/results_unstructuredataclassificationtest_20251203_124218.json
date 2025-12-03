@@ -1,0 +1,97 @@
+{
+  "processed_at": "2025-12-03T12:42:18.636876Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:42:11.548562Z",
+      "embedding": [],
+      "document_type": "presentation",
+      "summary": "This presentation provides a step-by-step guide on how to create a new digital ID for use in editable forms. It includes instructions on where to find the signature option, how to configure a new digital ID, and what information is required to create one.",
+      "context": "The purpose of this document is to instruct users on the process of creating a new digital ID for use in editable forms. It serves as a tutorial or guide.",
+      "metadata": {
+        "people": [],
+        "locations": [
+          "country"
+        ],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "new digital ID creation"
+        ],
+        "emails": [
+          "email ID"
+        ],
+        "phones": [],
+        "keywords": [
+          "signature arrow option",
+          "configure new digital ID",
+          "save to file",
+          "password creation"
+        ],
+        "other": {
+          "password_length": "6 digits"
+        }
+      },
+      "quality_score": 80,
+      "quality_notes": "The document provides clear instructions but lacks specific details such as the name of the software used, specific people or organizations involved, and dates. The 'email ID' and 'country' mentioned are placeholders and not actual data."
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:42:18.634239Z",
+      "embedding": [],
+      "document_type": "Programming tutorial",
+      "summary": "This document contains Python programming examples, explanations of data types, and various operations. It also covers mathematical operations, identifiers, keywords, and built-in functions.",
+      "context": "The purpose of this document is to provide a tutorial or reference material for learning Python programming concepts and syntax.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python programming",
+          "Data types",
+          "Mathematical operations",
+          "Identifiers",
+          "Keywords",
+          "Built-in functions"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "mathematical operations",
+          "identifier",
+          "keyword",
+          "built-in functions"
+        ],
+        "other": {}
+      },
+      "quality_score": 90,
+      "quality_notes": "The document content is clear and well-structured. However, it lacks information about the author, creation date, and specific purpose."
+    }
+  ]
+}

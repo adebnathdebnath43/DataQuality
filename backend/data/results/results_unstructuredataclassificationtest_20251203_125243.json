@@ -1,0 +1,218 @@
+{
+  "processed_at": "2025-12-03T12:52:43.620541Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:52:25.156540Z",
+      "embedding": [],
+      "overall_quality_score": 75,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 95,
+          "evidence": "The steps provided appear to be accurate, but without testing, it's hard to confirm."
+        },
+        "Completeness": {
+          "score": 80,
+          "evidence": "The document provides a step-by-step guide, but it's unclear if these are all the necessary steps."
+        },
+        "Consistency": {
+          "score": 100,
+          "evidence": "The formatting and language used are consistent throughout."
+        },
+        "Timeliness": {
+          "score": 80,
+          "evidence": "No clear execution or creation date is provided."
+        },
+        "Validity": {
+          "score": 100,
+          "evidence": "The provided steps follow a logical structure and appear valid."
+        },
+        "Uniqueness": {
+          "score": 100,
+          "evidence": "No indication that this is a duplicate."
+        },
+        "Reliability": {
+          "score": 60,
+          "evidence": "The source of the document is not clear, reducing its reliability."
+        },
+        "Relevance": {
+          "score": 100,
+          "evidence": "The document is directly relevant to creating digital signatures in editable forms."
+        },
+        "Accessibility": {
+          "score": 100,
+          "evidence": "The document is in a common format (PowerPoint) and appears to be easily accessible."
+        },
+        "Precision": {
+          "score": 95,
+          "evidence": "The steps provided are precise, but more detail could be beneficial."
+        },
+        "Integrity": {
+          "score": 100,
+          "evidence": "The document appears to be intact with no broken references."
+        },
+        "Conformity": {
+          "score": 90,
+          "evidence": "The document follows a typical guide format, but lacks some standard information like a creation date."
+        },
+        "Interpretability": {
+          "score": 90,
+          "evidence": "The language used is clear, but some terms may be unclear to those unfamiliar with digital signatures."
+        },
+        "Traceability": {
+          "score": 60,
+          "evidence": "No clear filename, version, author, or date is provided."
+        },
+        "Credibility": {
+          "score": 60,
+          "evidence": "The credibility of the document is unclear without knowing the source."
+        },
+        "Fitness_for_Use": {
+          "score": 80,
+          "evidence": "The document appears useful for its intended purpose, but more detail could be beneficial."
+        },
+        "Value": {
+          "score": 70,
+          "evidence": "The value of the document is somewhat unclear without more context, but it does provide useful instructions."
+        }
+      },
+      "document_type": "PowerPoint Presentation",
+      "summary": "A step-by-step guide on creating a new digital ID for use in editable forms.",
+      "context": "This document provides instructions for creating a digital signature in editable forms, likely for use in a business or organizational setting.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "digital ID",
+          "create",
+          "save to file",
+          "password"
+        ]
+      },
+      "quality_score": 75,
+      "quality_notes": "The document appears to be a clear guide, but lacks some context and the source is not clear."
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-03T12:52:43.618530Z",
+      "embedding": [],
+      "overall_quality_score": 78,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 85,
+          "evidence": "Most information appears correct, but there are minor errors (e.g., incorrect output for a complex number)."
+        },
+        "Completeness": {
+          "score": 100,
+          "evidence": "The document appears to be a complete Python tutorial for beginners."
+        },
+        "Consistency": {
+          "score": 70,
+          "evidence": "There are some inconsistencies in formatting and presentation (e.g., different styles for code blocks)."
+        },
+        "Timeliness": {
+          "score": 90,
+          "evidence": "The document appears to be up-to-date, but it does not mention recent Python features or versions."
+        },
+        "Validity": {
+          "score": 100,
+          "evidence": "The document follows standard Python syntax and conventions."
+        },
+        "Uniqueness": {
+          "score": 100,
+          "evidence": "The document appears to be unique, not a duplicate."
+        },
+        "Reliability": {
+          "score": 80,
+          "evidence": "The source of the document is unclear, but the content appears to be mostly reliable."
+        },
+        "Relevance": {
+          "score": 100,
+          "evidence": "The document is directly relevant to learning Python programming."
+        },
+        "Accessibility": {
+          "score": 100,
+          "evidence": "The document is in an accessible format (DOCX) and appears to be well-organized."
+        },
+        "Precision": {
+          "score": 90,
+          "evidence": "The document provides the right level of granularity for a beginner's tutorial, but some sections could be more detailed."
+        },
+        "Integrity": {
+          "score": 100,
+          "evidence": "The document appears to be intact, with no missing or corrupted sections."
+        },
+        "Conformity": {
+          "score": 80,
+          "evidence": "The document mostly follows standard Python tutorial conventions, but there are some deviations."
+        },
+        "Interpretability": {
+          "score": 90,
+          "evidence": "The document is mostly clear and easy to understand, but some sections could be better explained."
+        },
+        "Traceability": {
+          "score": 70,
+          "evidence": "The document has no clear version history or author information."
+        },
+        "Credibility": {
+          "score": 80,
+          "evidence": "The source of the document is unclear, but the content appears to be mostly credible."
+        },
+        "Fitness_for_Use": {
+          "score": 90,
+          "evidence": "The document appears to be suitable for teaching beginners Python programming."
+        },
+        "Value": {
+          "score": 80,
+          "evidence": "The document provides value as a Python tutorial, but its unclear source could pose some risks."
+        }
+      },
+      "document_type": "Python tutorial",
+      "summary": "A beginner's tutorial on Python covering basic concepts such as data types, variables, loops, functions, and common libraries.",
+      "context": "This document is intended to teach beginners the basics of Python programming language.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "programming",
+          "data types",
+          "variables",
+          "loops",
+          "functions"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "Python",
+          "tutorial",
+          "beginner",
+          "programming",
+          "basics"
+        ]
+      },
+      "quality_score": 75,
+      "quality_notes": "The document appears to be a well-structured Python tutorial for beginners, but it contains some minor errors and inconsistencies."
+    }
+  ]
+}

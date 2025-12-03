@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import './MetadataResultsTable.css';
+import DimensionScoreCard from './DimensionScoreCard';
 
 const MetadataResultsTable = ({ results }) => {
-    const [expandedRows, setExpandedRows] = useState(new Set());
+    // Auto-expand all rows by default to show dimensions
+    const [expandedRows, setExpandedRows] = useState(() => {
+        if (!results || !results.files) return new Set();
+        return new Set(results.files.map((_, index) => index));
+    });
 
     if (!results || !results.files || results.files.length === 0) {
         return null;
@@ -277,6 +282,16 @@ const MetadataResultsTable = ({ results }) => {
                                 {expandedRows.has(index) && file.status === 'success' && (
                                     <tr className="expanded-row">
                                         <td colSpan={metadataFields.length + 8}>
+                                            {/* 17-Dimension Quality Assessment */}
+                                            {file.dimensions && (
+                                                <DimensionScoreCard
+                                                    dimensions={file.dimensions}
+                                                    recommendedAction={file.recommended_action || 'REVIEW'}
+                                                    overallScore={file.overall_quality_score || file.quality_score || 50}
+                                                    fileName={file.file_name}
+                                                    fileData={file}
+                                                />
+                                            )}
                                             {renderExpandedMetadata(file)}
                                         </td>
                                     </tr>
