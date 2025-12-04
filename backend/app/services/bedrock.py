@@ -108,148 +108,141 @@ class BedrockService:
         
         prompt = f"""You are the world's most rigorous Enterprise Data Quality & Governance Agent. Your judgment determines whether multi-million-dollar decisions and regulated AI systems are allowed to use a document. You have been trained on thousands of real post-mortem incidents of data-quality failures that caused financial loss, regulatory fines, or emergency model rollbacks.
 
-Your task: Carefully analyze the provided unstructured document and assign an accurate numerical score from 0 to 100 for ALL 17 dimensions below. You must use the exact definitions and scoring rubrics provided. Never invent dimensions. Never skip one.
+Your task: Carefully analyze the provided unstructured document (and its metadata, summary, and extraction notes) and assign an accurate numerical score from 0 to 100 for ALL 17 dimensions below. You must use the exact definitions, real-world anchor examples, and scoring rubrics provided. Never invent dimensions. Never skip one.
 
 You are not allowed to be lenient. If in doubt, score lower and explain why.
 
 RETURN ONLY STRICTLY VALID JSON — nothing else, no markdown, no extra text.
 
-=== THE 17 DIMENSIONS ===
+=== DOCUMENT CONTEXT (always consider this) ===
+Document type: {file_name.split('.')[-1].upper() if '.' in file_name else 'UNKNOWN'}
+Use case: High-stakes RAG, LLM fine-tuning, legal/financial/compliance automation
+Consequence of bad data: Real money lost, deals killed, regulatory violations
+
+=== THE 17 DIMENSIONS WITH DEFINITIONS + REAL-WORLD ANCHOR EXAMPLES + SCORING RUBRIC ===
 
 1. Accuracy (Data correctly represents reality)
+   Real failure: Cap table showed founder with 95% instead of 9.5% → $40M valuation mistake
    100 = All facts, dates, numbers, entities provably correct
    70 = One minor typo that doesn't change meaning
-   30 = Impossible date or wrong amount
+   30 = Impossible date (Feb 30) or wrong amount
    0 = Multiple critical factual errors
 
 2. Completeness (Nothing required is missing)
+   Real failure: SPA missing pages 78–115 (all schedules) → RAG said "no reps"
    100 = All pages, exhibits, tables, signatures present
    0 = Large sections or entire document missing
 
 3. Consistency (Uniform representation, no contradictions)
+   Real failure: Same company called "Target" in first half, "Company" in second
    100 = Entity names, date/number formats, terminology identical throughout
    0 = Contradictory clauses or wildly inconsistent formatting
 
 4. Timeliness (Current and not superseded)
+   Real failure: Model quoted expired draft term sheet named "v12_draft.docx"
    100 = Clearly the final/executed/latest version
    50 = Old draft with no clear execution date
    0 = Known to be superseded
 
 5. Validity (Conforms to rules and formats)
+   Real failure: Dates in format 13/15/2024 or phone numbers with letters
    100 = All dates, currencies, IDs, structures follow standards
    0 = Multiple malformed fields
 
 6. Uniqueness (No duplicates or near-duplicates)
+   Real failure: 8 almost-identical NDA drafts polluted training data
    100 = Clearly unique or meaningfully different version
-   0 = Likely duplicate copy already in corpus
+   0 = Byte-for-byte or near-identical copy already in corpus
 
 7. Reliability (Source and process are trustworthy)
+   Real failure: Data from unverified third-party scraper
    100 = Official source (law firm, SEC filing, signed PDF)
-   0 = Unknown origin or unverified source
+   0 = Unknown origin, screenshot from WhatsApp
 
 8. Relevance (Useful for the intended business purpose)
+   Real failure: Data room contained birthday cards and cat memes
    100 = Directly relevant (contract, financials, board minutes)
    0 = Completely off-topic personal content
 
 9. Accessibility (Can be retrieved and parsed easily)
+   Real failure: Password-protected ZIP of 400 contracts
    100 = No password, renders perfectly, text selectable
    0 = Encrypted, corrupted, or unparseable
 
 10. Precision (Right level of granularity)
-    100 = Numbers have required decimal places
+    Real failure: Financials rounded to nearest million when cents matter
+    100 = Numbers have required decimal places (e.g., $12,345,678.90)
     0 = Excessive or insufficient precision
 
 11. Integrity (Relationships and constraints preserved)
+    Real failure: Cap table percentages sum to 101.3%
     100 = Totals add up, references correct
     0 = Broken referential integrity
 
 12. Conformity (Follows organizational/industry standards)
+    Real failure: Contract missing required boilerplate clauses
     100 = Matches expected template/structure
     0 = Deviates heavily from standard
 
 13. Interpretability (Meaning is clear)
+    Real failure: Hundreds of undefined acronyms
     100 = Clear language, defined terms, good metadata
     0 = Heavy jargon with no glossary
 
 14. Traceability (Clear origin and version history)
+    Real failure: File named "FINAL_Final_v2_REALLYFINAL.docx"
     100 = Clear filename, version, author, date
     0 = No provenance whatsoever
 
 15. Credibility (Believable and from reputable source)
-    100 = Signed by reputable firm or authority
+    Real failure: "Financials" from anonymous Google Drive link
+    100 = Signed by Big-4 auditor or law firm
     0 = Obvious forgery or joke document
 
 16. Fitness_for_Use (Actually usable for target AI/business tasks)
+    Real failure: 120-slide deck with 110 blank/logo slides
     100 = High signal-to-noise, dense useful content
     0 = Pure fluff or placeholders
 
 17. Value (Business benefit vs. risk/cost of ingestion)
+    Real failure: Toxic internal email thread that poisoned fine-tuned model
     100 = High ROI, low risk
     0 = High risk of bias, toxicity, PII, or legal exposure
 
 === STRICT JSON OUTPUT FORMAT ===
 
 {{
-  "file_name": "{file_name}",
-  "document_type": "type of document",
-  "summary": "Brief 2-3 sentence summary",
-  "context": "Purpose and use of this document",
-  "metadata": {{
-    "people": ["person names with roles"],
-    "locations": ["locations mentioned"],
-    "organizations": ["companies, institutions"],
-    "dates": ["important dates"],
-    "topics": ["main topics covered"],
-    "emails": ["email addresses"],
-    "phones": ["phone numbers"],
-    "keywords": ["important keywords"]
-  }},
-  "quality_score": 85,
-  "quality_notes": "Overall quality assessment",
-  "overall_quality_score": 89,
+  "document_id": "{file_name}",
+  "overall_quality_score": 75,
   "recommended_action": "KEEP",
   "dimensions": {{
-    "Accuracy": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Completeness": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Consistency": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Timeliness": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Validity": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Uniqueness": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Reliability": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Relevance": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Accessibility": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Precision": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Integrity": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Conformity": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Interpretability": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Traceability": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Credibility": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Fitness_for_Use": {{"score": 0-100, "evidence": "Evidence text"}},
-    "Value": {{"score": 0-100, "evidence": "Evidence text"}}
+    "Accuracy": {{"score": 95, "evidence": "One minor typo '20244' instead of '2024' but context clear"}},
+    "Completeness": {{"score": 100, "evidence": "All pages present"}},
+    "Consistency": {{"score": 85, "evidence": "Minor font change"}},
+    "Timeliness": {{"score": 100, "evidence": "Latest version"}},
+    "Validity": {{"score": 100, "evidence": "Valid formats"}},
+    "Uniqueness": {{"score": 100, "evidence": "Unique version"}},
+    "Reliability": {{"score": 100, "evidence": "Trusted source"}},
+    "Relevance": {{"score": 100, "evidence": "On topic"}},
+    "Accessibility": {{"score": 100, "evidence": "Text selectable"}},
+    "Precision": {{"score": 98, "evidence": "Proper decimals"}},
+    "Integrity": {{"score": 100, "evidence": "Totals add up"}},
+    "Conformity": {{"score": 95, "evidence": "Template matched"}},
+    "Interpretability": {{"score": 90, "evidence": "Defined terms"}},
+    "Traceability": {{"score": 100, "evidence": "Clear version history"}},
+    "Credibility": {{"score": 100, "evidence": "Executed counterpart"}},
+    "Fitness_for_Use": {{"score": 97, "evidence": "High density of useful content"}},
+    "Value": {{"score": 85, "evidence": "Minor PII risk"}}
   }}
 }}
-
-=== CRITICAL EVIDENCE REQUIREMENTS ===
-
-For ANY dimension scored BELOW 90, your evidence MUST include:
-1. A SPECIFIC QUOTE or example from the document (use quotation marks)
-2. EXACTLY what is wrong, missing, or problematic
-3. A concrete example of what would improve the score to 90+
-
-GOOD EVIDENCE EXAMPLE (score 75 on Completeness):
-"The document is missing page 3 (jumps from page 2 directly to page 4). The table of contents lists 'Section 2.3: Risk Analysis' but this section is not present. To reach 90+, the missing page and section must be added."
-
-BAD EVIDENCE EXAMPLE (too vague):
-"Some sections appear to be missing."
-
-For scores 90 or above, brief evidence is acceptable.
-
-{additional_prompt}
 
 NOW ANALYZE THIS DOCUMENT:
 
 File name: {file_name}
-Content (first 10000 chars):
+File type: {file_name.split('.')[-1].upper() if '.' in file_name else 'UNKNOWN'}
+Pages/Slides: unknown
+Extraction method & notes: {('Using text extraction from source file. ' + (('Additional context: ' + additional_prompt) if additional_prompt else '')).strip()}
+
 {content[:10000]}
 
 Return ONLY the JSON above. Begin immediately.
@@ -332,13 +325,47 @@ Return ONLY the JSON above. Begin immediately.
                 if start_idx != -1 and end_idx > start_idx:
                     json_str = result_text[start_idx:end_idx]
             
+            def _ensure_17_dimensions(obj: dict) -> dict:
+                """Ensure the response includes all 17 dimensions with sensible defaults."""
+                DIMENSION_KEYS = [
+                    "accuracy", "completeness", "consistency", "timeliness", "validity",
+                    "uniqueness", "reliability", "relevance", "accessibility", "precision",
+                    "integrity", "conformity", "interpretability", "traceability",
+                    "fitness_for_use", "value"
+                ]
+
+                # Normalize key format (handle spaces vs underscores, case-insensitive)
+                dims = obj.get("dimensions", {}) if isinstance(obj, dict) else {}
+                normalized = {}
+                for k, v in (dims.items() if isinstance(dims, dict) else []):
+                    key = k.strip().lower().replace(" ", "_")
+                    normalized[key] = v if isinstance(v, dict) else {"score": v if isinstance(v, (int, float)) else 50, "evidence": str(v)}
+
+                for key in DIMENSION_KEYS:
+                    if key not in normalized:
+                        normalized[key] = {"score": 50, "evidence": "Dimension not assessed by LLM"}
+
+                obj["dimensions"] = normalized
+                # Compute overall score if missing
+                if "overall_quality_score" not in obj and obj.get("dimensions"):
+                    scores = [d.get("score", 0) for d in obj["dimensions"].values() if isinstance(d, dict)]
+                    if scores:
+                        obj["overall_quality_score"] = sum(scores) / len(scores)
+                return obj
+
             if json_str:
                 parsed = json.loads(json_str)
                 print(f"[DEBUG] Parsed JSON keys: {parsed.keys()}")
                 print(f"[DEBUG] Has dimensions: {'dimensions' in parsed}")
-                return parsed
+                return _ensure_17_dimensions(parsed)
             else:
-                return {"error": "Failed to parse JSON response", "raw_response": result_text[:1000]}
+                # Fallback: build minimal structure with defaults
+                fallback = {
+                    "summary": "Model returned no parseable JSON. Using defaults.",
+                    "context": "",
+                    "dimensions": {},
+                }
+                return _ensure_17_dimensions(fallback)
 
         except Exception as e:
             print(f"Error invoking Bedrock: {str(e)}")

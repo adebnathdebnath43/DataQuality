@@ -6,6 +6,11 @@ from app.models.schemas import (
     HealthResponse
 )
 from app.services.metadata import MetadataService
+from app.services.s3 import S3Service
+from app.services.bedrock import BedrockService
+import glob
+import json
+import datetime
 
 router = APIRouter()
 metadata_service = MetadataService()
@@ -573,6 +578,344 @@ async def reject_dimension(request: Request):
             json.dump(result_data, f, indent=2)
         
         return {"status": "success", "message": f"Dimension {dimension_name} rejected", "feedback": feedback}
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reanalyze-dimension")
+async def reanalyze_dimension(request: Request):
+    """Re-analyze a single dimension with user feedback"""
+    try:
+        data = await request.json()
+        file_name = data.get("file_name")
+        dimension_name = data.get("dimension_name")
+        feedback = data.get("feedback", "")
+        bucket = data.get("bucket")
+        region = data.get("region")
+        access_key = data.get("access_key")
+        secret_key = data.get("secret_key")
+        model_id = data.get("model_id")
+        
+        if not all([file_name, dimension_name, bucket, region, access_key, secret_key, model_id]):
+            raise HTTPException(status_code=400, detail="Missing required parameters")
+        
+        # Find the result file to get file_key
+        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        result_file = None
+        file_key = None
+        file_data_ref = None
+        
+        for filepath in glob.glob(f"{results_dir}/*.json"):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                result_data = json.load(f)
+                for file_data in result_data.get("files", []):
+                    if file_data.get("file_name") == file_name:
+                        result_file = filepath
+                        file_key = file_data.get("file_key")
+                        file_data_ref = file_data
+                        break
+                if result_file:
+                    break
+        
+        if not result_file or not file_key:
+            raise HTTPException(status_code=404, detail="File not found in results")
+        
+        # Get file content from S3
+        s3_service = S3Service()
+        # Read raw bytes for text extraction
+        file_content = await s3_service.read_file(
+            bucket=bucket,
+            key=file_key,
+            region=region,
+            access_key=access_key,
+            secret_key=secret_key,
+            binary=True
+        )
+        
+        # Extract text from the file
+        metadata_service = MetadataService()
+        file_ext = file_key.split('.')[-1] if '.' in file_key else 'txt'
+        extracted_text = metadata_service._extract_text(file_content, file_ext)
+        
+        # Build focused prompt for this specific dimension using the strict scoring rubric
+        # Get the dimension definition from the master prompt
+        dimension_definitions = {
+            "accuracy": "1. Accuracy (Data correctly represents reality)\n   Real failure: Cap table showed founder with 95% instead of 9.5% → $40M valuation mistake\n   100 = All facts, dates, numbers, entities provably correct\n   70 = One minor typo that doesn't change meaning\n   30 = Impossible date (Feb 30) or wrong amount\n   0 = Multiple critical factual errors",
+            "completeness": "2. Completeness (Nothing required is missing)\n   Real failure: SPA missing pages 78–115 (all schedules) → RAG said \"no reps\"\n   100 = All pages, exhibits, tables, signatures present\n   0 = Large sections or entire document missing",
+            "consistency": "3. Consistency (Uniform representation, no contradictions)\n   Real failure: Same company called \"Target\" in first half, \"Company\" in second\n   100 = Entity names, date/number formats, terminology identical throughout\n   0 = Contradictory clauses or wildly inconsistent formatting",
+            "timeliness": "4. Timeliness (Current and not superseded)\n   Real failure: Model quoted expired draft term sheet named \"v12_draft.docx\"\n   100 = Clearly the final/executed/latest version\n   50 = Old draft with no clear execution date\n   0 = Known to be superseded",
+            "validity": "5. Validity (Conforms to rules and formats)\n   Real failure: Dates in format 13/15/2024 or phone numbers with letters\n   100 = All dates, currencies, IDs, structures follow standards\n   0 = Multiple malformed fields",
+            "uniqueness": "6. Uniqueness (No duplicates or near-duplicates)\n   Real failure: 8 almost-identical NDA drafts polluted training data\n   100 = Clearly unique or meaningfully different version\n   0 = Byte-for-byte or near-identical copy already in corpus",
+            "reliability": "7. Reliability (Source and process are trustworthy)\n   Real failure: Data from unverified third-party scraper\n   100 = Official source (law firm, SEC filing, signed PDF)\n   0 = Unknown origin, screenshot from WhatsApp",
+            "relevance": "8. Relevance (Useful for the intended business purpose)\n   Real failure: Data room contained birthday cards and cat memes\n   100 = Directly relevant (contract, financials, board minutes)\n   0 = Completely off-topic personal content",
+            "accessibility": "9. Accessibility (Can be retrieved and parsed easily)\n   Real failure: Password-protected ZIP of 400 contracts\n   100 = No password, renders perfectly, text selectable\n   0 = Encrypted, corrupted, or unparseable",
+            "precision": "10. Precision (Right level of granularity)\n    Real failure: Financials rounded to nearest million when cents matter\n    100 = Numbers have required decimal places (e.g., $12,345,678.90)\n    0 = Excessive or insufficient precision",
+            "integrity": "11. Integrity (Relationships and constraints preserved)\n    Real failure: Cap table percentages sum to 101.3%\n    100 = Totals add up, references correct\n    0 = Broken referential integrity",
+            "conformity": "12. Conformity (Follows organizational/industry standards)\n    Real failure: Contract missing required boilerplate clauses\n    100 = Matches expected template/structure\n    0 = Deviates heavily from standard",
+            "interpretability": "13. Interpretability (Meaning is clear)\n    Real failure: Hundreds of undefined acronyms\n    100 = Clear language, defined terms, good metadata\n    0 = Heavy jargon with no glossary",
+            "traceability": "14. Traceability (Clear origin and version history)\n    Real failure: File named \"FINAL_Final_v2_REALLYFINAL.docx\"\n    100 = Clear filename, version, author, date\n    0 = No provenance whatsoever",
+            "credibility": "15. Credibility (Believable and from reputable source)\n    Real failure: \"Financials\" from anonymous Google Drive link\n    100 = Signed by Big-4 auditor or law firm\n    0 = Obvious forgery or joke document",
+            "fitness_for_use": "16. Fitness_for_Use (Actually usable for target AI/business tasks)\n    Real failure: 120-slide deck with 110 blank/logo slides\n    100 = High signal-to-noise, dense useful content\n    0 = Pure fluff or placeholders",
+            "value": "17. Value (Business benefit vs. risk/cost of ingestion)\n    Real failure: Toxic internal email thread that poisoned fine-tuned model\n    100 = High ROI, low risk\n    0 = High risk of bias, toxicity, PII, or legal exposure"
+        }
+        
+        dim_key = dimension_name.lower().replace(" ", "_")
+        dimension_def = dimension_definitions.get(dim_key, f"{dimension_name} dimension")
+        
+        # Truncate content to avoid overwhelming the LLM
+        content_preview = extracted_text[:4000] if len(extracted_text) > 4000 else extracted_text
+        
+        focused_prompt = f"""You are a rigorous Enterprise Data Quality Agent re-evaluating a SINGLE dimension.
+
+USER REJECTION & FEEDBACK:
+The user rejected the previous assessment of '{dimension_name}' with this feedback:
+"{feedback}"
+
+YOUR TASK:
+Re-evaluate ONLY the '{dimension_name}' dimension using the scoring rubric below and considering the user's feedback.
+
+{dimension_def}
+
+DOCUMENT TO RE-ANALYZE:
+File: {file_name}
+Type: {file_name.split('.')[-1].upper() if '.' in file_name else 'UNKNOWN'}
+
+Content:
+{content_preview}
+
+OUTPUT FORMAT - Return ONLY valid JSON, no markdown, no extra text:
+{{
+  "{dimension_name}": {{
+    "score": 75,
+    "evidence": "Specific evidence from the document addressing the user's feedback"
+  }}
+}}"""
+        
+        # Call Bedrock directly with focused prompt
+        bedrock_service = BedrockService(region_name=region)
+        
+        # Invoke model directly with the focused prompt
+        client = bedrock_service._get_client(region, access_key, secret_key)
+        
+        # Prepare request based on model type
+        if 'anthropic' in model_id.lower() or 'claude' in model_id.lower():
+            body = json.dumps({
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 2000,
+                "temperature": 0.3,
+                "messages": [{"role": "user", "content": focused_prompt}]
+            })
+        elif 'mistral' in model_id.lower():
+            body = json.dumps({
+                "prompt": f"<s>[INST] {focused_prompt} [/INST]",
+                "max_tokens": 2000,
+                "temperature": 0.3
+            })
+        else:
+            # Generic format
+            body = json.dumps({
+                "prompt": focused_prompt,
+                "max_tokens": 2000,
+                "temperature": 0.3
+            })
+        
+        print(f"\n=== RE-ANALYSIS REQUEST ===")
+        print(f"Model: {model_id}")
+        print(f"Dimension: {dimension_name}")
+        print(f"Feedback: {feedback}")
+        print(f"Content length: {len(extracted_text)} chars")
+        
+        response = client.invoke_model(modelId=model_id, body=body)
+        response_body = json.loads(response['body'].read())
+        
+        # Extract result based on model type
+        if 'anthropic' in model_id.lower() or 'claude' in model_id.lower():
+            result_text = response_body['content'][0]['text']
+        elif 'mistral' in model_id.lower():
+            result_text = response_body['outputs'][0]['text']
+        else:
+            result_text = response_body.get('completion', response_body.get('text', ''))
+        
+        print(f"\n=== BEDROCK RAW RESPONSE ===")
+        print(f"Response length: {len(result_text)} chars")
+        print(f"First 500 chars: {result_text[:500]}")
+        print(f"Last 200 chars: {result_text[-200:]}")
+        print(f"=== END RAW RESPONSE ===\n")
+        print(f"\n=== BEDROCK RAW RESPONSE ===")
+        print(f"Response length: {len(result_text)} chars")
+        print(f"First 500 chars: {result_text[:500]}")
+        print(f"Last 200 chars: {result_text[-200:]}")
+        print(f"=== END RAW RESPONSE ===\n")
+        
+        # Parse JSON from response with robust error handling
+        try:
+            # Clean the response text
+            json_str = result_text.strip()
+            
+            # Remove markdown code blocks if present
+            if '```json' in json_str:
+                start = json_str.find('```json') + 7
+                end = json_str.find('```', start)
+                if end == -1:
+                    end = len(json_str)
+                json_str = json_str[start:end].strip()
+            elif '```' in json_str:
+                start = json_str.find('```') + 3
+                end = json_str.find('```', start)
+                if end == -1:
+                    end = len(json_str)
+                json_str = json_str[start:end].strip()
+            
+            # Find JSON object boundaries if not at start
+            if json_str and json_str[0] != '{':
+                start_idx = json_str.find('{')
+                if start_idx != -1:
+                    end_idx = json_str.rfind('}') + 1
+                    if end_idx > start_idx:
+                        json_str = json_str[start_idx:end_idx]
+            
+            # Remove any trailing text after the closing brace
+            if json_str and '}' in json_str:
+                last_brace = json_str.rfind('}')
+                json_str = json_str[:last_brace + 1]
+            
+            print(f"Cleaned JSON string (first 300 chars): {json_str[:300]}")
+            
+            # Parse the JSON
+            parsed = json.loads(json_str)
+            print(f"Successfully parsed JSON with keys: {list(parsed.keys())}")
+            
+            # Extract dimension result with multiple strategies
+            dimension_result = None
+            
+            # Strategy 1: Exact dimension name match
+            if dimension_name in parsed:
+                dimension_result = parsed[dimension_name]
+                print(f"✓ Found via exact match: {dimension_name}")
+            
+            # Strategy 2: Normalized key match
+            elif dim_key in parsed:
+                dimension_result = parsed[dim_key]
+                print(f"✓ Found via normalized key: {dim_key}")
+            
+            # Strategy 3: Case-insensitive search
+            else:
+                for key, value in parsed.items():
+                    if isinstance(value, dict) and 'score' in value:
+                        key_lower = key.lower().replace(" ", "_").replace("-", "_")
+                        dim_lower = dimension_name.lower().replace(" ", "_").replace("-", "_")
+                        if key_lower == dim_lower:
+                            dimension_result = value
+                            print(f"✓ Found via case-insensitive match: {key}")
+                            break
+            
+            # Strategy 4: Direct dimension object (response is {score, evidence})
+            if not dimension_result and 'score' in parsed and 'evidence' in parsed:
+                dimension_result = parsed
+                print(f"✓ Response is direct dimension object")
+            
+            # Strategy 5: First dict with score and evidence
+            if not dimension_result:
+                for key, value in parsed.items():
+                    if isinstance(value, dict) and 'score' in value and 'evidence' in value:
+                        dimension_result = value
+                        print(f"✓ Found dimension object under key: {key}")
+                        break
+            
+            if not dimension_result:
+                raise ValueError(f"No dimension data found in response. Available keys: {list(parsed.keys())}")
+            
+            # Validate the dimension result has required fields
+            if not isinstance(dimension_result, dict):
+                raise ValueError(f"Dimension result is not a dict: {type(dimension_result)}")
+            
+            if 'score' not in dimension_result:
+                raise ValueError(f"Dimension result missing 'score' field. Keys: {list(dimension_result.keys())}")
+            
+            if 'evidence' not in dimension_result:
+                dimension_result['evidence'] = f"Re-analyzed based on feedback: {feedback}"
+            
+            print(f"✓ Final dimension result - Score: {dimension_result['score']}, Evidence length: {len(str(dimension_result['evidence']))} chars")
+                
+        except json.JSONDecodeError as json_error:
+            print(f"❌ JSON decode error: {str(json_error)}")
+            print(f"Attempted to parse: {json_str[:500] if 'json_str' in locals() else result_text[:500]}")
+            dimension_result = {
+                "score": 50,
+                "evidence": f"Re-analysis JSON parsing failed: {str(json_error)}. User feedback: {feedback}. Please check backend logs for full response."
+            }
+        except Exception as parse_error:
+            print(f"❌ General parsing error: {str(parse_error)}")
+            print(f"Error type: {type(parse_error).__name__}")
+            dimension_result = {
+                "score": 50,
+                "evidence": f"Re-analysis failed: {str(parse_error)}. User feedback: {feedback}. Check backend logs for details."
+            }
+        
+        # Update the result file with new dimension score
+        with open(result_file, 'r', encoding='utf-8') as f:
+            result_data = json.load(f)
+        
+        for file_data in result_data.get("files", []):
+            if file_data.get("file_name") == file_name:
+                # Initialize dimension_approvals if not exists
+                if "dimension_approvals" not in file_data:
+                    file_data["dimension_approvals"] = {}
+                
+                # Store re-analysis history
+                if dimension_name not in file_data["dimension_approvals"]:
+                    file_data["dimension_approvals"][dimension_name] = {}
+                
+                if "history" not in file_data["dimension_approvals"][dimension_name]:
+                    file_data["dimension_approvals"][dimension_name]["history"] = []
+                
+                # Add current state to history before updating
+                current_dim = file_data.get("dimensions", {}).get(dimension_name, {})
+                file_data["dimension_approvals"][dimension_name]["history"].append({
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "action": "reanalyzed",
+                    "feedback": feedback,
+                    "old_score": current_dim.get("score", 0),
+                    "old_evidence": current_dim.get("evidence", ""),
+                    "new_score": dimension_result.get("score", 0),
+                    "new_evidence": dimension_result.get("evidence", "")
+                })
+                
+                # Update dimension score and evidence
+                if "dimensions" not in file_data:
+                    file_data["dimensions"] = {}
+                
+                file_data["dimensions"][dimension_name] = {
+                    "score": dimension_result.get("score", 0),
+                    "evidence": dimension_result.get("evidence", "")
+                }
+                
+                # Update status to reanalyzed
+                file_data["dimension_approvals"][dimension_name]["status"] = "reanalyzed"
+                file_data["dimension_approvals"][dimension_name]["feedback"] = feedback
+                file_data["dimension_approvals"][dimension_name]["timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                
+                # Recalculate overall score
+                if file_data.get("dimensions"):
+                    scores = [d.get("score", 0) for d in file_data["dimensions"].values() if isinstance(d, dict)]
+                    if scores:
+                        file_data["overall_quality_score"] = sum(scores) / len(scores)
+                
+                break
+        
+        # Save updated data
+        with open(result_file, 'w', encoding='utf-8') as f:
+            json.dump(result_data, f, indent=2)
+        
+        return {
+            "status": "success",
+            "dimension": dimension_name,
+            "new_score": dimension_result.get("score", 0),
+            "new_evidence": dimension_result.get("evidence", ""),
+            "overall_score": file_data.get("overall_quality_score", 0)
+        }
     
     except Exception as e:
         import traceback

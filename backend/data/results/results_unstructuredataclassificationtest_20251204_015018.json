@@ -1,0 +1,169 @@
+{
+  "processed_at": "2025-12-04T01:50:18.737102Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-04T01:50:07.578684Z",
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 100,
+          "evidence": "No factual content to validate"
+        },
+        "completeness": {
+          "score": 50,
+          "evidence": "Number of pages/slides unknown"
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "No inconsistencies detected in the provided text"
+        },
+        "timeliness": {
+          "score": 100,
+          "evidence": "No date or version information provided"
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "No data fields to validate"
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "No information to suggest it's a duplicate"
+        },
+        "reliability": {
+          "score": 50,
+          "evidence": "Source and extraction method mentioned, but reliability not established"
+        },
+        "relevance": {
+          "score": 80,
+          "evidence": "Seems relevant to digital signatures, but full context unknown"
+        },
+        "accessibility": {
+          "score": 80,
+          "evidence": "Text extraction possible, but full accessibility unknown"
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "No numerical data to evaluate"
+        },
+        "integrity": {
+          "score": 50,
+          "evidence": "Unable to validate relationships or constraints with provided information"
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "Seems to follow a process, but full conformance unknown"
+        },
+        "interpretability": {
+          "score": 80,
+          "evidence": "Clear instructions, but context and definitions may be missing"
+        },
+        "traceability": {
+          "score": 50,
+          "evidence": "No clear origin or version history provided"
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "No information about the author or source's reputation"
+        },
+        "fitness_for_use": {
+          "score": 60,
+          "evidence": "Some useful content, but full usefulness unknown"
+        },
+        "value": {
+          "score": 60,
+          "evidence": "Potential value, but risk/cost unknown without more context"
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx"
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-04T01:50:18.734610Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 0,
+          "evidence": "Document contains code, not facts or data to verify accuracy"
+        },
+        "completeness": {
+          "score": 0,
+          "evidence": "Number of pages or slides unknown"
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "Code syntax and structure are consistent"
+        },
+        "timeliness": {
+          "score": 0,
+          "evidence": "No date or version information provided"
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "Code syntax appears valid"
+        },
+        "uniqueness": {
+          "score": 0,
+          "evidence": "Unknown if duplicate or near-duplicate in corpus"
+        },
+        "reliability": {
+          "score": 0,
+          "evidence": "Source and process of document unknown"
+        },
+        "relevance": {
+          "score": 50,
+          "evidence": "Document contains Python code, relevance depends on use case"
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "Text is selectable and parseable"
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "Code uses precise numeric values where required"
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "Code structure and references appear intact"
+        },
+        "conformity": {
+          "score": 100,
+          "evidence": "Code follows Python syntax and structure standards"
+        },
+        "interpretability": {
+          "score": 80,
+          "evidence": "Code is mostly clear, but lacks comments or documentation"
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "No clear filename, version, author, or date"
+        },
+        "credibility": {
+          "score": 0,
+          "evidence": "Source and author of code unknown"
+        },
+        "fitness_for_use": {
+          "score": 50,
+          "evidence": "Usefulness depends on specific AI/business task"
+        },
+        "value": {
+          "score": 50,
+          "evidence": "Value depends on specific AI/business task and potential risks"
+        }
+      },
+      "document_id": "Python.docx"
+    }
+  ]
+}

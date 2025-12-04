@@ -1,0 +1,193 @@
+{
+  "processed_at": "2025-12-04T01:36:14.267848Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-04T01:35:53.965568Z",
+      "embedding": [],
+      "overall_quality_score": 75,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 90,
+          "evidence": "The steps provided appear to be accurate, but without testing, it's unclear if they are 100% correct."
+        },
+        "Completeness": {
+          "score": 70,
+          "evidence": "The document lacks an introduction and conclusion, and it does not provide context on why one would need a digital signature."
+        },
+        "Consistency": {
+          "score": 100,
+          "evidence": "The document is consistent in its formatting and language."
+        },
+        "Timeliness": {
+          "score": 80,
+          "evidence": "The document does not have a date, so it's unclear if it's the latest version or if it's outdated."
+        },
+        "Validity": {
+          "score": 90,
+          "evidence": "The document appears to follow standard steps for creating a digital signature, but without more context, it's unclear if it's valid for all use cases."
+        },
+        "Uniqueness": {
+          "score": 100,
+          "evidence": "The document appears to be unique."
+        },
+        "Reliability": {
+          "score": 80,
+          "evidence": "The source of the document is unclear, so its reliability cannot be fully determined."
+        },
+        "Relevance": {
+          "score": 90,
+          "evidence": "The document is relevant to creating digital signatures, but its relevance to specific business purposes is unclear."
+        },
+        "Accessibility": {
+          "score": 100,
+          "evidence": "The document is in a standard PowerPoint format and appears to be easily accessible."
+        },
+        "Precision": {
+          "score": 90,
+          "evidence": "The document provides precise steps, but it's unclear if these steps are sufficient for all users."
+        },
+        "Integrity": {
+          "score": 90,
+          "evidence": "The document appears to maintain integrity, but without more context, it's unclear if all relationships and constraints are preserved."
+        },
+        "Conformity": {
+          "score": 90,
+          "evidence": "The document appears to conform to standard tutorial formats, but it's unclear if it conforms to specific organizational or industry standards."
+        },
+        "Interpretability": {
+          "score": 80,
+          "evidence": "The document is generally clear, but some terms and steps could be better defined or explained."
+        },
+        "Traceability": {
+          "score": 70,
+          "evidence": "The document lacks clear provenance, such as an author, date, or version number."
+        },
+        "Credibility": {
+          "score": 80,
+          "evidence": "The credibility of the document is unclear without knowing the source."
+        },
+        "Fitness_for_Use": {
+          "score": 80,
+          "evidence": "The document appears to be useful for its intended purpose, but its fitness for specific AI or business tasks is unclear."
+        },
+        "Value": {
+          "score": 80,
+          "evidence": "The value of the document is unclear without knowing its specific business use case and potential risks."
+        }
+      },
+      "document_type": "PowerPoint Presentation",
+      "summary": "A tutorial on how to create a digital signature in editable forms using Adobe Acrobat.",
+      "context": "This document appears to be a step-by-step guide for creating a digital ID for use in editable forms.",
+      "metadata": {
+        "people": [],
+        "locations": [],
+        "organizations": [],
+        "dates": [],
+        "topics": [
+          "digital signature",
+          "editable forms",
+          "Adobe Acrobat"
+        ],
+        "emails": [],
+        "phones": [],
+        "keywords": [
+          "digital ID",
+          "create",
+          "save to file",
+          "password"
+        ]
+      },
+      "quality_score": 75,
+      "quality_notes": "The document appears to be a clear guide but lacks some important details and context."
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-04T01:36:14.262078Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      },
+      "summary": "Analysis failed",
+      "error": "Expecting ',' delimiter: line 38 column 4 (char 3727)"
+    }
+  ]
+}
