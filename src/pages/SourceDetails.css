@@ -1,5 +1,14 @@
 .source-details {
     padding-bottom: 4rem;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+.files-section {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
 .details-header {
@@ -420,4 +429,10 @@ border-bottom: 1px solid var(--border-color);
 
 .selected-row td {
     background: rgba(34, 211, 238, 0.1) !important;
+}
+
+.files-section {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
 }

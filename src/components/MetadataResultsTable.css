@@ -4,6 +4,9 @@
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: visible;
+    width: 100%;
+    max-width: 100%;
 }
 
 .results-header {
@@ -46,8 +49,15 @@
 
 .table-container {
     overflow-x: auto;
+    overflow-y: visible;
     border-radius: 8px;
     background: var(--bg-primary);
+    width: 100%;
+    max-width: 100%;
+    /* Only show horizontal scrollbar when content overflows, no vertical scrollbar */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent double scrollbar */
+    max-height: none;
 }
 
 .metadata-table {
@@ -148,6 +158,9 @@
 .expanded-metadata {
     padding: 1.5rem;
     overflow-x: hidden;
+    overflow-y: visible;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .metadata-grid {
@@ -155,6 +168,7 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-bottom: 1.5rem;
+    max-width: 100%;
 }
 
 .metadata-section h4 {
@@ -190,6 +204,7 @@
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
+    max-width: 100%;
 }
 
 .text-section h4 {

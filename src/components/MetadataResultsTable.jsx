@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './MetadataResultsTable.css';
 import DimensionScoreCard from './DimensionScoreCard';
 
-const MetadataResultsTable = ({ results }) => {
+const MetadataResultsTable = ({ results, sourceMetadata, onRefresh }) => {
     // Auto-expand all rows by default to show dimensions
     const [expandedRows, setExpandedRows] = useState(() => {
         if (!results || !results.files) return new Set();
@@ -290,6 +290,8 @@ const MetadataResultsTable = ({ results }) => {
                                                     overallScore={file.overall_quality_score || file.quality_score || 50}
                                                     fileName={file.file_name}
                                                     fileData={file}
+                                                    sourceMetadata={sourceMetadata}
+                                                    onRefresh={onRefresh}
                                                 />
                                             )}
                                             {renderExpandedMetadata(file)}

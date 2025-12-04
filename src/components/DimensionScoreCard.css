@@ -56,6 +56,7 @@
 
 .dimension-table {
     overflow-x: auto;
+    overflow-y: visible;
 }
 
 .dimension-table table {
