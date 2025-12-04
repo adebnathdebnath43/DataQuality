@@ -9,6 +9,9 @@ const Dashboard = () => {
     const [connectedSources, setConnectedSources] = useState([]);
     const [dashboardMetrics, setDashboardMetrics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedBucket, setSelectedBucket] = useState('all');
+    const [selectedAction, setSelectedAction] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const sources = JSON.parse(localStorage.getItem('connectedSources') || '[]');
@@ -46,14 +49,60 @@ const Dashboard = () => {
         }
     };
 
+    // Get unique buckets from file keys
+    const getUniqueBuckets = () => {
+        if (!dashboardMetrics?.recent_files) return [];
+        const buckets = new Set();
+        dashboardMetrics.recent_files.forEach(file => {
+            const fileKey = file.file_key || '';
+            if (fileKey.startsWith('s3://')) {
+                const bucket = fileKey.split('/')[2];
+                if (bucket) buckets.add(bucket);
+            }
+        });
+        return Array.from(buckets);
+    };
+
+    // Filter files based on selected filters
+    const getFilteredFiles = () => {
+        if (!dashboardMetrics?.recent_files) return [];
+        
+        return dashboardMetrics.recent_files.filter(file => {
+            // Filter by bucket
+            if (selectedBucket !== 'all') {
+                const fileKey = file.file_key || '';
+                const bucket = fileKey.startsWith('s3://') ? fileKey.split('/')[2] : '';
+                if (bucket !== selectedBucket) return false;
+            }
+
+            // Filter by action
+            if (selectedAction !== 'all' && file.recommended_action !== selectedAction) {
+                return false;
+            }
+
+            // Filter by search term
+            if (searchTerm && !file.file_name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                return false;
+            }
+
+            return true;
+        });
+    };
+
+    const uniqueBuckets = dashboardMetrics ? getUniqueBuckets() : [];
+    const filteredFiles = dashboardMetrics ? getFilteredFiles() : [];
+    const avgQualityScore = dashboardMetrics?.last_7_days.length > 0
+        ? Math.round(dashboardMetrics.last_7_days.reduce((sum, day) => sum + day.avg_quality_score, 0) / dashboardMetrics.last_7_days.length)
+        : 0;
+
     return (
         <div className="dashboard fade-in">
             <section className="hero-section">
                 <h1 className="hero-title">
-                    Aether <span className="text-gradient">Intelligence</span>
+                    <span className="text-gradient">Data Quality</span> Dashboard
                 </h1>
                 <p className="hero-subtitle">
-                    Data Clarity at Scale. Monitor, validate, and improve your data assets across all your cloud platforms.
+                    Monitor and validate your data assets with AI-powered quality assessment
                 </p>
                 <div className="hero-actions">
                     <Link to="/connect">
@@ -83,17 +132,15 @@ const Dashboard = () => {
                         </Card>
 
                         <Card title="S3 Bucket">
-                            <div className="stat-value" style={{ fontSize: '1.5rem', color: '#3b82f6' }}>
-                                {dashboardMetrics.bucket_name}
+                            <div className="stat-value" style={{ fontSize: '1.5rem', color: '#60a5fa' }}>
+                                {dashboardMetrics.bucket_name !== 'N/A' ? dashboardMetrics.bucket_name : 'No bucket connected'}
                             </div>
                             <p className="stat-desc">Connected source</p>
                         </Card>
 
                         <Card title="Average Quality Score">
-                            <div className="stat-value">
-                                {dashboardMetrics.last_7_days.length > 0
-                                    ? Math.round(dashboardMetrics.last_7_days.reduce((sum, day) => sum + day.avg_quality_score, 0) / dashboardMetrics.last_7_days.length)
-                                    : 0}%
+                            <div className="stat-value" style={{ color: getScoreColor(avgQualityScore) }}>
+                                {avgQualityScore}%
                             </div>
                             <p className="stat-desc">Across all files</p>
                         </Card>
@@ -103,29 +150,21 @@ const Dashboard = () => {
                     {dashboardMetrics.last_7_days.length > 0 && (
                         <section className="quality-trend-section">
                             <h2 className="section-title">Quality Score Trend (Last 7 Days)</h2>
-                            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', height: '200px' }}>
+                            <div className="glass-panel trend-chart">
+                                <div className="chart-container">
                                     {dashboardMetrics.last_7_days.map((day, index) => (
-                                        <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{
-                                                height: `${day.avg_quality_score * 2}px`,
-                                                width: '100%',
-                                                background: getScoreColor(day.avg_quality_score),
-                                                borderRadius: '4px 4px 0 0',
-                                                display: 'flex',
-                                                alignItems: 'flex-start',
-                                                justifyContent: 'center',
-                                                padding: '0.5rem 0',
-                                                color: 'white',
-                                                fontWeight: 'bold',
-                                                fontSize: '0.875rem'
-                                            }}>
-                                                {day.avg_quality_score}
+                                        <div key={index} className="chart-bar">
+                                            <div className="bar-value"
+                                                style={{
+                                                    height: `${(day.avg_quality_score / 100) * 180}px`,
+                                                    background: `linear-gradient(180deg, ${getScoreColor(day.avg_quality_score)}, ${getScoreColor(day.avg_quality_score)}dd)`
+                                                }}>
+                                                <span className="bar-label">{day.avg_quality_score}</span>
                                             </div>
-                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
+                                            <div className="bar-date">
                                                 {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                             </div>
-                                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                            <div className="bar-count">
                                                 {day.files_processed} files
                                             </div>
                                         </div>
@@ -139,78 +178,129 @@ const Dashboard = () => {
                     {Object.keys(dashboardMetrics.avg_dimension_scores).length > 0 && (
                         <section className="dimension-scores-section">
                             <h2 className="section-title">Average Dimension Scores</h2>
-                            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                                    {Object.entries(dashboardMetrics.avg_dimension_scores).map(([dimName, score]) => (
-                                        <div key={dimName} style={{
-                                            background: 'rgba(15, 23, 42, 0.5)',
-                                            padding: '1rem',
-                                            borderRadius: '8px',
-                                            border: '1px solid #334155'
-                                        }}>
-                                            <div style={{ fontSize: '0.875rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-                                                {dimName.replace(/_/g, ' ')}
+                            <div className="glass-panel dimension-grid">
+                                {Object.entries(dashboardMetrics.avg_dimension_scores)
+                                    .sort(([, a], [, b]) => b - a)
+                                    .map(([dimName, score]) => (
+                                        <div key={dimName} className="dimension-card">
+                                            <div className="dimension-name">
+                                                {dimName.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                             </div>
-                                            <div style={{
-                                                fontSize: '1.5rem',
-                                                fontWeight: 'bold',
-                                                color: getScoreColor(score)
-                                            }}>
-                                                {score}/100
+                                            <div className="dimension-score" style={{ color: getScoreColor(score) }}>
+                                                {score}<span style={{ fontSize: '1rem', opacity: 0.7 }}>/100</span>
                                             </div>
                                         </div>
                                     ))}
-                                </div>
                             </div>
                         </section>
                     )}
 
-                    {/* Recent Files */}
+                    {/* Recent Files with Filters */}
                     {dashboardMetrics.recent_files.length > 0 && (
                         <section className="recent-files-section">
                             <h2 className="section-title">Recent Quality Checks</h2>
-                            <div className="glass-panel">
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            
+                            {/* Filters */}
+                            <div className="filters-container glass-panel">
+                                <div className="filter-group">
+                                    <label>🔍 Search Files</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Search by filename..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="filter-input"
+                                    />
+                                </div>
+
+                                <div className="filter-group">
+                                    <label>🪣 S3 Bucket</label>
+                                    <select
+                                        value={selectedBucket}
+                                        onChange={(e) => setSelectedBucket(e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        <option value="all">All Buckets</option>
+                                        {uniqueBuckets.map(bucket => (
+                                            <option key={bucket} value={bucket}>{bucket}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="filter-group">
+                                    <label>⚡ Recommended Action</label>
+                                    <select
+                                        value={selectedAction}
+                                        onChange={(e) => setSelectedAction(e.target.value)}
+                                        className="filter-select"
+                                    >
+                                        <option value="all">All Actions</option>
+                                        <option value="KEEP">KEEP</option>
+                                        <option value="REVIEW">REVIEW</option>
+                                        <option value="QUARANTINE">QUARANTINE</option>
+                                        <option value="DISCARD">DISCARD</option>
+                                    </select>
+                                </div>
+
+                                <div className="filter-results">
+                                    Showing <strong>{filteredFiles.length}</strong> of <strong>{dashboardMetrics.recent_files.length}</strong> files
+                                </div>
+                            </div>
+
+                            {/* Files Table */}
+                            <div className="glass-panel files-table-container">
+                                <table className="files-table">
                                     <thead>
-                                        <tr style={{ borderBottom: '2px solid #334155' }}>
-                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>File Name</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Quality Score</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Action</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontWeight: 600 }}>Processed</th>
+                                        <tr>
+                                            <th>File Name</th>
+                                            <th>Quality Score</th>
+                                            <th>Action</th>
+                                            <th>Processed</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {dashboardMetrics.recent_files.map((file, index) => (
-                                            <tr key={index} style={{ borderBottom: '1px solid #334155' }}>
-                                                <td style={{ padding: '1rem', color: '#e2e8f0' }}>{file.file_name}</td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <span style={{
-                                                        background: getScoreColor(file.quality_score),
-                                                        color: 'white',
-                                                        padding: '0.25rem 0.75rem',
-                                                        borderRadius: '6px',
-                                                        fontWeight: 'bold'
-                                                    }}>
-                                                        {file.quality_score}/100
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '1rem' }}>
-                                                    <span style={{
-                                                        background: getActionColor(file.recommended_action),
-                                                        color: 'white',
-                                                        padding: '0.25rem 0.75rem',
-                                                        borderRadius: '6px',
-                                                        fontSize: '0.875rem',
-                                                        fontWeight: 'bold'
-                                                    }}>
-                                                        {file.recommended_action}
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
-                                                    {new Date(file.processed_at).toLocaleString()}
+                                        {filteredFiles.length > 0 ? (
+                                            filteredFiles.map((file, index) => (
+                                                <tr key={index}>
+                                                    <td className="file-name-cell">
+                                                        <div className="file-name-wrapper">
+                                                            <span className="file-icon">📄</span>
+                                                            <span className="file-name-text">{file.file_name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="score-badge"
+                                                            style={{
+                                                                background: getScoreColor(file.quality_score),
+                                                            }}>
+                                                            {file.quality_score}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span className="action-badge"
+                                                            style={{
+                                                                background: getActionColor(file.recommended_action),
+                                                            }}>
+                                                            {file.recommended_action}
+                                                        </span>
+                                                    </td>
+                                                    <td className="date-cell">
+                                                        {new Date(file.processed_at).toLocaleString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                                    No files match the selected filters
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -219,12 +309,16 @@ const Dashboard = () => {
                 </>
             ) : (
                 <div style={{ textAlign: 'center', padding: '3rem' }}>
-                    <p style={{ color: '#94a3b8', fontSize: '1.125rem' }}>
-                        No quality check data available. Run a quality check to see metrics.
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📊</div>
+                    <p style={{ color: '#94a3b8', fontSize: '1.125rem', marginBottom: '1rem' }}>
+                        No quality check data available yet
+                    </p>
+                    <p style={{ color: '#64748b', marginBottom: '2rem' }}>
+                        Run your first quality check to see comprehensive metrics and insights
                     </p>
                     {connectedSources.length > 0 && (
                         <Link to={`/source/${connectedSources[0].id}`}>
-                            <Button variant="primary" style={{ marginTop: '1rem' }}>Run Quality Check</Button>
+                            <Button variant="primary">Run Quality Check</Button>
                         </Link>
                     )}
                 </div>
