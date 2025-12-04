@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import MetadataResultsTable from '../components/MetadataResultsTable';
-import { listFiles, listHistory, getHistoryContent, API_URL } from '../services/api';
+import { listFiles, listHistory, getHistoryContent, extractMetadata, API_URL } from '../services/api';
 import './SourceDetails.css';
 
 const SourceDetails = () => {
@@ -263,6 +263,45 @@ const SourceDetails = () => {
             setShowHistory(false);
         } catch (err) {
             setError('Failed to load history file: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const recomputeDimensionsFromHistory = async () => {
+        try {
+            if (!qualityCheckResults || !qualityCheckResults.files || qualityCheckResults.files.length === 0) {
+                alert('No history result loaded');
+                return;
+            }
+            const files = qualityCheckResults.files;
+            const keys = files.map(f => f.file_key).filter(Boolean);
+            if (keys.length === 0) {
+                alert('History entry does not contain file keys to re-analyze');
+                return;
+            }
+
+            setLoading(true);
+            const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
+            const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
+            const roleArn = source.authMethod === 'assume_role' ? source.roleArn : undefined;
+
+            const result = await extractMetadata(
+                source.bucket,
+                keys,
+                source.region,
+                accessKey,
+                secretKey,
+                roleArn,
+                selectedModel
+            );
+
+            setQualityCheckResults(result);
+            localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(result));
+            alert('Computed 17-Dimension scores for history entry');
+        } catch (err) {
+            console.error('Error recomputing dimensions from history:', err);
+            alert('Failed to compute 17-Dimension scores: ' + (err.response?.data?.detail || err.message));
         } finally {
             setLoading(false);
         }
@@ -601,8 +640,26 @@ const SourceDetails = () => {
                             <Button variant="secondary" onClick={clearResults}>
                                 Clear Results
                             </Button>
+                            {qualityCheckResults.files && qualityCheckResults.files.length > 0 && !qualityCheckResults.files[0].dimensions && (
+                                <Button variant="primary" onClick={recomputeDimensionsFromHistory} style={{ marginLeft: '0.5rem' }}>
+                                    Compute 17-Dimension Scores
+                                </Button>
+                            )}
                         </div>
-                        <MetadataResultsTable results={qualityCheckResults} />
+                        <MetadataResultsTable 
+                            results={qualityCheckResults}
+                            connectionConfig={{
+                                bucket: source.bucket,
+                                region: source.region,
+                                accessKey: (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined,
+                                secretKey: (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined,
+                                modelId: selectedModel
+                            }}
+                            onResultsChange={(updatedResults) => {
+                                setQualityCheckResults(updatedResults);
+                                localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(updatedResults));
+                            }}
+                        />
                     </>
                 )}
             </section>

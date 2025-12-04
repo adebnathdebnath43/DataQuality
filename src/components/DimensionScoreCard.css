@@ -198,8 +198,145 @@
     color: #ef4444;
 }
 
+.status-badge.reanalyzed {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
 .rejected-row {
     background: rgba(239, 68, 68, 0.05);
+}
+
+.reanalyzed-row {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.reanalyze-btn {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.reanalyze-btn:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+}
+
+.reanalyze-btn:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.history-toggle {
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.history-toggle:hover {
+    color: #2563eb;
+}
+
+.history-row {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.history-row td {
+    padding: 1.5rem !important;
+}
+
+.history-details {
+    color: #e2e8f0;
+}
+
+.history-details h4 {
+    color: #3b82f6;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.history-entry {
+    background: #1e293b;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    border-left: 3px solid #3b82f6;
+}
+
+.history-timestamp {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.history-action {
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
+}
+
+.history-feedback {
+    background: rgba(251, 191, 36, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    color: #f59e0b;
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+}
+
+.history-scores {
+    color: #94a3b8;
+    margin: 0.5rem 0;
+}
+
+.history-scores strong {
+    color: #e2e8f0;
+}
+
+.history-evidence {
+    margin-top: 0.5rem;
+}
+
+.history-evidence details {
+    cursor: pointer;
+}
+
+.history-evidence summary {
+    color: #3b82f6;
+    font-size: 0.875rem;
+    padding: 0.25rem 0;
+}
+
+.history-evidence summary:hover {
+    color: #2563eb;
+}
+
+.evidence-comparison {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.evidence-comparison > div {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.evidence-comparison strong {
+    color: #3b82f6;
+    display: block;
+    margin-bottom: 0.25rem;
 }
 
 .feedback-note {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Radar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -9,7 +9,7 @@ import {
     Tooltip,
     Legend
 } from 'chart.js';
-import api from '../services/api';
+import { approveDimension, rejectDimension, reanalyzeDimension } from '../services/api';
 import { downloadAsJSON, downloadAsText } from '../utils/reportGenerator';
 import './DimensionScoreCard.css';
 
@@ -23,19 +23,31 @@ ChartJS.register(
     Legend
 );
 
-const DimensionScoreCard = ({ dimensions, recommendedAction, overallScore, fileName, fileData }) => {
+const DimensionScoreCard = ({ dimensions, recommendedAction, overallScore, fileName, fileData, connectionConfig, onDataChange }) => {
     const [dimensionApprovals, setDimensionApprovals] = useState(fileData?.dimension_approvals || {});
-    const [feedbackModal, setFeedbackModal] = useState({ show: false, dimension: null });
+    const [feedbackModal, setFeedbackModal] = useState({ show: false, dimension: null, mode: 'reject' });
     const [feedback, setFeedback] = useState('');
     const [reanalyzing, setReanalyzing] = useState(false);
+    const [showHistory, setShowHistory] = useState({});
+    const [currentDimensions, setCurrentDimensions] = useState(dimensions);
+
+    // Sync state with props when fileData changes (e.g., when navigating back)
+    useEffect(() => {
+        if (fileData?.dimension_approvals) {
+            setDimensionApprovals(fileData.dimension_approvals);
+        }
+        if (dimensions) {
+            setCurrentDimensions(dimensions);
+        }
+    }, [fileData, dimensions]);
 
     if (!dimensions || Object.keys(dimensions).length === 0) {
         return null;
     }
 
     // Prepare data for radar chart
-    const dimensionNames = Object.keys(dimensions);
-    const scores = dimensionNames.map(name => dimensions[name]?.score || 0);
+    const dimensionNames = Object.keys(currentDimensions);
+    const scores = dimensionNames.map(name => currentDimensions[name]?.score || 0);
 
     const radarData = {
         labels: dimensionNames,
@@ -109,76 +121,144 @@ const DimensionScoreCard = ({ dimensions, recommendedAction, overallScore, fileN
     // Handle dimension approval
     const handleApproveDimension = async (dimensionName) => {
         try {
-            await api.post('/approve-dimension', {
-                file_name: fileName,
-                dimension_name: dimensionName
-            });
+            await approveDimension(fileName, dimensionName);
 
-            setDimensionApprovals(prev => ({
-                ...prev,
+            const newApprovals = {
+                ...dimensionApprovals,
                 [dimensionName]: { status: 'approved', timestamp: new Date().toISOString() }
-            }));
+            };
+            setDimensionApprovals(newApprovals);
+            
+            // Notify parent component to update its data
+            if (onDataChange) {
+                onDataChange({ dimension_approvals: newApprovals });
+            }
         } catch (error) {
             console.error('Error approving dimension:', error);
-            alert('Failed to approve dimension');
+            alert('Failed to approve dimension: ' + (error.response?.data?.detail || error.message));
         }
     };
 
     // Handle dimension rejection
     const handleRejectDimension = (dimensionName) => {
-        setFeedbackModal({ show: true, dimension: dimensionName });
+        setFeedbackModal({ show: true, dimension: dimensionName, mode: 'reject' });
         setFeedback('');
     };
 
     // Submit rejection with feedback
     const submitRejection = async () => {
-        try {
-            await api.post('/reject-dimension', {
-                file_name: fileName,
-                dimension_name: feedbackModal.dimension,
-                feedback: feedback
-            });
+        if (!feedback.trim()) {
+            alert('Please provide feedback for rejection');
+            return;
+        }
 
-            setDimensionApprovals(prev => ({
-                ...prev,
+        try {
+            await rejectDimension(fileName, feedbackModal.dimension, feedback);
+
+            const newApprovals = {
+                ...dimensionApprovals,
                 [feedbackModal.dimension]: {
                     status: 'rejected',
                     feedback: feedback,
                     timestamp: new Date().toISOString()
                 }
-            }));
+            };
+            setDimensionApprovals(newApprovals);
 
-            setFeedbackModal({ show: false, dimension: null });
+            // Notify parent component to update its data
+            if (onDataChange) {
+                onDataChange({ dimension_approvals: newApprovals });
+            }
+
+            setFeedbackModal({ show: false, dimension: null, mode: 'reject' });
+            alert('Dimension rejected successfully. You can now re-analyze it with your feedback.');
         } catch (error) {
             console.error('Error rejecting dimension:', error);
-            alert('Failed to reject dimension');
+            alert('Failed to reject dimension: ' + (error.response?.data?.detail || error.message));
         }
     };
 
-    // Handle re-analysis
-    const handleReanalyze = async () => {
-        const rejectedDimensions = Object.entries(dimensionApprovals)
-            .filter(([_, approval]) => approval.status === 'rejected')
-            .reduce((acc, [dim, approval]) => {
-                acc[dim] = approval.feedback;
-                return acc;
-            }, {});
+    // Handle re-analysis of a rejected dimension
+    const handleReanalyzeDimension = async (dimensionName) => {
+        const approval = dimensionApprovals[dimensionName];
+        if (!approval || approval.status !== 'rejected') {
+            alert('Please reject the dimension first before re-analyzing');
+            return;
+        }
 
-        if (Object.keys(rejectedDimensions).length === 0) {
-            alert('No rejected dimensions to re-analyze');
+        if (!connectionConfig) {
+            alert('Connection configuration is missing. Please go back and configure connection.');
+            return;
+        }
+
+        setFeedbackModal({ show: true, dimension: dimensionName, mode: 'reanalyze' });
+        setFeedback(approval.feedback || '');
+    };
+
+    const submitReanalysis = async () => {
+        if (!feedback.trim()) {
+            alert('Please provide feedback for re-analysis');
             return;
         }
 
         setReanalyzing(true);
         try {
-            // This would need file metadata from parent component
-            alert('Re-analysis feature requires file metadata. Please implement in parent component.');
+            const result = await reanalyzeDimension(
+                fileName,
+                feedbackModal.dimension,
+                feedback,
+                connectionConfig.bucket,
+                connectionConfig.region,
+                connectionConfig.accessKey,
+                connectionConfig.secretKey,
+                connectionConfig.modelId
+            );
+
+            // Update current dimensions with new score
+            const newDimensions = {
+                ...currentDimensions,
+                [feedbackModal.dimension]: {
+                    score: result.new_score,
+                    evidence: result.new_evidence
+                }
+            };
+            setCurrentDimensions(newDimensions);
+
+            // Update approvals to show reanalyzed status
+            const newApprovals = {
+                ...dimensionApprovals,
+                [feedbackModal.dimension]: {
+                    status: 'reanalyzed',
+                    feedback: feedback,
+                    timestamp: new Date().toISOString()
+                }
+            };
+            setDimensionApprovals(newApprovals);
+
+            // Notify parent component to update its data
+            if (onDataChange) {
+                onDataChange({ 
+                    dimensions: newDimensions,
+                    dimension_approvals: newApprovals 
+                });
+            }
+
+            setFeedbackModal({ show: false, dimension: null, mode: 'reject' });
+            alert(`Dimension re-analyzed successfully! New score: ${result.new_score}/100`);
         } catch (error) {
-            console.error('Error re-analyzing:', error);
-            alert('Failed to re-analyze file');
+            console.error('Error re-analyzing dimension:', error);
+            alert('Failed to re-analyze dimension: ' + (error.response?.data?.detail || error.message));
         } finally {
             setReanalyzing(false);
         }
+    };
+
+    // Toggle history display
+    const toggleHistory = (dimensionName) => {
+        setShowHistory(prev => ({
+            ...prev,
+            [dimensionName]: !prev[dimensionName]
+        }));
     };
 
     return (
@@ -226,65 +306,150 @@ const DimensionScoreCard = ({ dimensions, recommendedAction, overallScore, fileN
                         </thead>
                         <tbody>
                             {dimensionNames.map(name => {
-                                const dim = dimensions[name];
+                                const dim = currentDimensions[name];
                                 const score = dim?.score || 0;
                                 const approval = dimensionApprovals[name];
+                                const hasHistory = approval?.history && approval.history.length > 0;
 
                                 return (
-                                    <tr key={name} className={approval?.status === 'rejected' ? 'rejected-row' : ''}>
-                                        <td className="dimension-name">{name.replace(/_/g, ' ')}</td>
-                                        <td>
-                                            <div className="score-cell">
-                                                <span
-                                                    className="score-badge"
-                                                    style={{ background: getScoreColor(score) }}
-                                                >
-                                                    {score}
-                                                </span>
-                                                <div className="score-bar">
-                                                    <div
-                                                        className="score-fill"
-                                                        style={{
-                                                            width: `${score}%`,
-                                                            background: getScoreColor(score)
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="evidence-cell">
-                                            {dim?.evidence || 'N/A'}
-                                            {approval?.feedback && (
-                                                <div className="feedback-note">
-                                                    <strong>Feedback:</strong> {approval.feedback}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="actions-cell">
-                                            {approval?.status === 'approved' ? (
-                                                <span className="status-badge approved">✓ Approved</span>
-                                            ) : approval?.status === 'rejected' ? (
-                                                <span className="status-badge rejected">✗ Rejected</span>
-                                            ) : (
-                                                <div className="action-buttons">
+                                    <React.Fragment key={name}>
+                                        <tr className={approval?.status === 'rejected' ? 'rejected-row' : approval?.status === 'reanalyzed' ? 'reanalyzed-row' : ''}>
+                                            <td className="dimension-name">
+                                                {name.replace(/_/g, ' ')}
+                                                {hasHistory && (
                                                     <button
-                                                        className="approve-btn"
-                                                        onClick={() => handleApproveDimension(name)}
-                                                        title="Approve this dimension"
+                                                        onClick={() => toggleHistory(name)}
+                                                        className="history-toggle"
+                                                        title="View history"
                                                     >
-                                                        ✓
+                                                        📜 {showHistory[name] ? '▼' : '▶'}
                                                     </button>
-                                                    <button
-                                                        className="reject-btn"
-                                                        onClick={() => handleRejectDimension(name)}
-                                                        title="Reject and provide feedback"
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="score-cell">
+                                                    <span
+                                                        className="score-badge"
+                                                        style={{ background: getScoreColor(score) }}
                                                     >
-                                                        ✗
-                                                    </button>
+                                                        {score}
+                                                    </span>
+                                                    <div className="score-bar">
+                                                        <div
+                                                            className="score-fill"
+                                                            style={{
+                                                                width: `${score}%`,
+                                                                background: getScoreColor(score)
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td className="evidence-cell">
+                                                {dim?.evidence || 'N/A'}
+                                                {approval?.feedback && (
+                                                    <div className="feedback-note">
+                                                        <strong>Feedback:</strong> {approval.feedback}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="actions-cell">
+                                                {approval?.status === 'approved' ? (
+                                                    <span className="status-badge approved">✓ Approved</span>
+                                                ) : approval?.status === 'rejected' ? (
+                                                    <div className="action-buttons">
+                                                        <span className="status-badge rejected">✗ Rejected</span>
+                                                        <button
+                                                            className="reanalyze-btn"
+                                                            onClick={() => handleReanalyzeDimension(name)}
+                                                            title="Re-analyze this dimension with feedback"
+                                                        >
+                                                            🔄 Re-analyze
+                                                        </button>
+                                                    </div>
+                                                ) : approval?.status === 'reanalyzed' ? (
+                                                    <div className="action-buttons">
+                                                        <span className="status-badge reanalyzed">🔄 Re-analyzed</span>
+                                                        <button
+                                                            className="approve-btn"
+                                                            onClick={() => handleApproveDimension(name)}
+                                                            title="Approve this dimension"
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button
+                                                            className="reject-btn"
+                                                            onClick={() => handleRejectDimension(name)}
+                                                            title="Reject again"
+                                                        >
+                                                            ✗
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="action-buttons">
+                                                        <button
+                                                            className="approve-btn"
+                                                            onClick={() => handleApproveDimension(name)}
+                                                            title="Approve this dimension"
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button
+                                                            className="reject-btn"
+                                                            onClick={() => handleRejectDimension(name)}
+                                                            title="Reject and provide feedback"
+                                                        >
+                                                            ✗
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                        {showHistory[name] && hasHistory && (
+                                            <tr className="history-row">
+                                                <td colSpan="4">
+                                                    <div className="history-details">
+                                                        <h4>History for {name.replace(/_/g, ' ')}</h4>
+                                                        {approval.history.map((entry, idx) => (
+                                                            <div key={idx} className="history-entry">
+                                                                <div className="history-timestamp">
+                                                                    {new Date(entry.timestamp).toLocaleString()}
+                                                                </div>
+                                                                <div className="history-action">
+                                                                    Action: <strong>{entry.action}</strong>
+                                                                </div>
+                                                                {entry.feedback && (
+                                                                    <div className="history-feedback">
+                                                                        Feedback: {entry.feedback}
+                                                                    </div>
+                                                                )}
+                                                                <div className="history-scores">
+                                                                    <span>Old Score: <strong>{entry.old_score}</strong></span>
+                                                                    {' → '}
+                                                                    <span>New Score: <strong>{entry.new_score}</strong></span>
+                                                                </div>
+                                                                {entry.old_evidence && (
+                                                                    <div className="history-evidence">
+                                                                        <details>
+                                                                            <summary>View Evidence Changes</summary>
+                                                                            <div className="evidence-comparison">
+                                                                                <div>
+                                                                                    <strong>Old:</strong> {entry.old_evidence}
+                                                                                </div>
+                                                                                <div>
+                                                                                    <strong>New:</strong> {entry.new_evidence}
+                                                                                </div>
+                                                                            </div>
+                                                                        </details>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>
@@ -294,26 +459,31 @@ const DimensionScoreCard = ({ dimensions, recommendedAction, overallScore, fileN
 
             {/* Feedback Modal */}
             {feedbackModal.show && (
-                <div className="modal-overlay" onClick={() => setFeedbackModal({ show: false, dimension: null })}>
+                <div className="modal-overlay" onClick={() => setFeedbackModal({ show: false, dimension: null, mode: 'reject' })}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Reject Dimension: {feedbackModal.dimension?.replace(/_/g, ' ')}</h3>
-                        <p>Please provide feedback for re-analysis:</p>
+                        <h3>
+                            {feedbackModal.mode === 'reanalyze' ? 'Re-analyze' : 'Reject'} Dimension: {feedbackModal.dimension?.replace(/_/g, ' ')}
+                        </h3>
+                        <p>Please provide feedback for {feedbackModal.mode === 'reanalyze' ? 're-analysis' : 'rejection'}:</p>
                         <textarea
                             value={feedback}
                             onChange={(e) => setFeedback(e.target.value)}
-                            placeholder="E.g., The document actually contains all required sections. Please re-evaluate Completeness considering pages 5-7."
+                            placeholder={feedbackModal.mode === 'reanalyze' 
+                                ? "E.g., The document actually contains all required sections on pages 5-7. Please reconsider the completeness score."
+                                : "E.g., The document actually contains all required sections. Please re-evaluate Completeness considering pages 5-7."}
                             rows={4}
                             style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
                         />
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                            <button onClick={() => setFeedbackModal({ show: false, dimension: null })}>
+                            <button onClick={() => setFeedbackModal({ show: false, dimension: null, mode: 'reject' })}>
                                 Cancel
                             </button>
                             <button
-                                onClick={submitRejection}
-                                style={{ background: '#ef4444', color: 'white' }}
+                                onClick={feedbackModal.mode === 'reanalyze' ? submitReanalysis : submitRejection}
+                                disabled={reanalyzing}
+                                style={{ background: feedbackModal.mode === 'reanalyze' ? '#3b82f6' : '#ef4444', color: 'white' }}
                             >
-                                Submit Rejection
+                                {reanalyzing ? 'Processing...' : (feedbackModal.mode === 'reanalyze' ? 'Re-analyze Now' : 'Submit Rejection')}
                             </button>
                         </div>
                     </div>

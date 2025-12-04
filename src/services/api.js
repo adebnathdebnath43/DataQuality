@@ -128,3 +128,49 @@ export const getHistoryContent = async (filename) => {
         throw error;
     }
 };
+
+export const approveDimension = async (fileName, dimensionName) => {
+    try {
+        const response = await api.post('/approve-dimension', {
+            file_name: fileName,
+            dimension_name: dimensionName
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error approving dimension:', error);
+        throw error;
+    }
+};
+
+export const rejectDimension = async (fileName, dimensionName, feedback) => {
+    try {
+        const response = await api.post('/reject-dimension', {
+            file_name: fileName,
+            dimension_name: dimensionName,
+            feedback: feedback
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting dimension:', error);
+        throw error;
+    }
+};
+
+export const reanalyzeDimension = async (fileName, dimensionName, feedback, bucket, region, accessKey, secretKey, modelId) => {
+    try {
+        const response = await api.post('/reanalyze-dimension', {
+            file_name: fileName,
+            dimension_name: dimensionName,
+            feedback: feedback,
+            bucket: bucket,
+            region: region,
+            access_key: accessKey,
+            secret_key: secretKey,
+            model_id: modelId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error reanalyzing dimension:', error);
+        throw error;
+    }
+};

@@ -2,12 +2,30 @@ import React, { useState } from 'react';
 import './MetadataResultsTable.css';
 import DimensionScoreCard from './DimensionScoreCard';
 
-const MetadataResultsTable = ({ results, sourceMetadata, onRefresh }) => {
+const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) => {
     // Auto-expand all rows by default to show dimensions
     const [expandedRows, setExpandedRows] = useState(() => {
         if (!results || !results.files) return new Set();
         return new Set(results.files.map((_, index) => index));
     });
+    
+    const [localResults, setLocalResults] = useState(results);
+
+    // Handler for when dimension data changes
+    const handleDataChange = (fileIndex, updates) => {
+        const newResults = { ...localResults };
+        newResults.files = [...newResults.files];
+        newResults.files[fileIndex] = {
+            ...newResults.files[fileIndex],
+            ...updates
+        };
+        setLocalResults(newResults);
+        
+        // Notify parent component to update localStorage
+        if (onResultsChange) {
+            onResultsChange(newResults);
+        }
+    };
 
     if (!results || !results.files || results.files.length === 0) {
         return null;
@@ -16,7 +34,7 @@ const MetadataResultsTable = ({ results, sourceMetadata, onRefresh }) => {
     // Get all unique metadata fields from all files
     const getAllMetadataFields = () => {
         const fieldsSet = new Set();
-        results.files.forEach(file => {
+        localResults.files.forEach(file => {
             if (file.metadata && typeof file.metadata === 'object') {
                 Object.keys(file.metadata).forEach(key => {
                     // Only include fields that have values in at least one file
@@ -211,7 +229,7 @@ const MetadataResultsTable = ({ results, sourceMetadata, onRefresh }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {results.files.map((file, index) => (
+                        {localResults.files.map((file, index) => (
                             <React.Fragment key={index}>
                                 <tr className={file.status === 'error' ? 'error-row' : ''}>
                                     <td className="expand-col">
@@ -290,8 +308,8 @@ const MetadataResultsTable = ({ results, sourceMetadata, onRefresh }) => {
                                                     overallScore={file.overall_quality_score || file.quality_score || 50}
                                                     fileName={file.file_name}
                                                     fileData={file}
-                                                    sourceMetadata={sourceMetadata}
-                                                    onRefresh={onRefresh}
+                                                    connectionConfig={connectionConfig}
+                                                    onDataChange={(updates) => handleDataChange(index, updates)}
                                                 />
                                             )}
                                             {renderExpandedMetadata(file)}
