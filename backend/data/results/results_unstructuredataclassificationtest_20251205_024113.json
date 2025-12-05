@@ -1,0 +1,345 @@
+{
+  "processed_at": "2025-12-05T02:41:13.899733Z",
+  "total_files": 4,
+  "successful": 4,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:40:13.080816Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      },
+      "summary": "Analysis failed",
+      "error": "Expecting ',' delimiter: line 32 column 205 (char 3595)"
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:40:33.516867Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      },
+      "summary": "Analysis failed",
+      "error": "Expecting ',' delimiter: line 28 column 195 (char 3597)"
+    },
+    {
+      "file_key": "Python_123.docx",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:40:54.012893Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      },
+      "summary": "Analysis failed",
+      "error": "Expecting ',' delimiter: line 31 column 198 (char 3740)"
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "unstructure_classification_test_doc1.pdf",
+      "status": "success",
+      "processed_at": "2025-12-05T02:41:13.890349Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess accuracy due to lack of document content. Cannot verify facts, dates, numbers, or entities."
+        },
+        "completeness": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess completeness due to lack of document content. Cannot determine if all pages, exhibits, tables, signatures are present."
+        },
+        "consistency": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess consistency due to lack of document content. Cannot verify uniformity of entity names, date/number formats, terminology."
+        },
+        "timeliness": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess timeliness due to lack of document content. Cannot determine if document is current and not superseded."
+        },
+        "validity": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess validity due to lack of document content. Cannot verify conformance to rules and formats."
+        },
+        "uniqueness": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess uniqueness due to lack of document content. Cannot determine if document is a duplicate or near-duplicate."
+        },
+        "reliability": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess reliability due to lack of document content. Cannot verify source and process are trustworthy."
+        },
+        "relevance": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess relevance due to lack of document content. Cannot determine if document is useful for the intended business purpose."
+        },
+        "accessibility": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess accessibility due to lack of document content. Cannot determine if document can be retrieved and parsed easily."
+        },
+        "precision": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess precision due to lack of document content. Cannot determine if document has the right level of granularity."
+        },
+        "integrity": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess integrity due to lack of document content. Cannot determine if relationships and constraints are preserved."
+        },
+        "conformity": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess conformity due to lack of document content. Cannot determine if document follows organizational/industry standards."
+        },
+        "interpretability": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess interpretability due to lack of document content. Cannot determine if meaning is clear."
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess traceability due to lack of document content. Cannot determine clear origin and version history."
+        },
+        "credibility": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess credibility due to lack of document content. Cannot determine if document is believable and from reputable source."
+        },
+        "fitness_for_use": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess fitness for use due to lack of document content. Cannot determine if document is actually usable for target AI/business tasks."
+        },
+        "value": {
+          "score": 0,
+          "evidence": "DETAILED: Unable to assess value due to lack of document content. Cannot determine business benefit vs. risk/cost of ingestion."
+        }
+      },
+      "document_id": "unstructure_classification_test_doc1.pdf",
+      "document_type": "Unknown",
+      "summary": "Unable to summarize due to lack of document content.",
+      "context": "Unknown context due to lack of document content.",
+      "metadata": {
+        "people": [
+          "Addy (abcd@mail.com)"
+        ],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [],
+        "key_terms": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,394 @@
+{
+  "processed_at": "2025-12-05T02:49:57.320032Z",
+  "total_files": 4,
+  "successful": 4,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:49:03.662613Z",
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 100,
+          "evidence": "All steps and instructions in the document appear to be accurate and correct."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The document appears to cover all steps to create a digital ID, but the number of slides is unknown."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The document consistently refers to the process of creating a digital ID and uses consistent terminology throughout."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not have a clear execution or creation date, so it's unclear if it's the latest version."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "All instructions and steps follow a logical and standard format."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The document appears to be unique, providing specific instructions for creating a digital ID."
+        },
+        "reliability": {
+          "score": 70,
+          "evidence": "The source of the document is unknown, making it difficult to assess reliability."
+        },
+        "relevance": {
+          "score": 50,
+          "evidence": "The document is relevant for creating digital IDs, but may not be directly relevant to legal or financial tasks."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in PPTX format and can be easily accessed and parsed."
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "The document provides precise steps for creating a digital ID."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The document appears to maintain integrity, with all steps and instructions logically following each other."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The document appears to follow a standard format for a tutorial or guide, but it's unclear if it conforms to specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 90,
+          "evidence": "The document is clear and easy to understand, but some technical terms may be unclear to non-expert readers."
+        },
+        "traceability": {
+          "score": 30,
+          "evidence": "The document has a filename, but no clear version, author, or date information."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The credibility of the document is unclear without knowing the source or author."
+        },
+        "fitness_for_use": {
+          "score": 60,
+          "evidence": "The document is useful for its intended purpose, but may not be directly usable for AI/business tasks."
+        },
+        "value": {
+          "score": 60,
+          "evidence": "The document has some value for creating digital IDs, but its business benefit vs. risk/cost of ingestion is unclear."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document appears to be a tutorial or guide on creating a digital signature for use in editable forms.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Digital Signature",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "New digital ID",
+          "Create a new digital ID",
+          "Save to file"
+        ]
+      }
+    },
+    {
+      "file_key": "Python.docx",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:49:24.051773Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      },
+      "summary": "Analysis failed",
+      "error": "Expecting ',' delimiter: line 32 column 245 (char 3529)"
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:49:43.193300Z",
+      "embedding": [],
+      "overall_quality_score": 65,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 95,
+          "evidence": "The document appears factually correct, but some minor errors may be present, such as inconsistent whitespace and formatting."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The document covers many Python basics but seems to lack some context or a clear purpose, and certain topics may be incomplete."
+        },
+        "consistency": {
+          "score": 80,
+          "evidence": "Formatting and presentation are mostly consistent, but there are minor inconsistencies in whitespace and indentation."
+        },
+        "timeliness": {
+          "score": 100,
+          "evidence": "The document contains timeless Python programming concepts that have not been superseded."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "The document follows standard Python syntax and conventions, with no apparent structural violations."
+        },
+        "uniqueness": {
+          "score": 90,
+          "evidence": "The document appears to be a unique set of notes or a tutorial, but some examples and concepts may be common across Python resources."
+        },
+        "reliability": {
+          "score": 80,
+          "evidence": "The source and process for creating the document are unknown, but the content appears to be accurate and reliable."
+        },
+        "relevance": {
+          "score": 70,
+          "evidence": "The document is relevant for technical and educational purposes, but its applicability to specific business or legal tasks is unclear."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in DOCX format, which can be easily extracted and parsed."
+        },
+        "precision": {
+          "score": 95,
+          "evidence": "The document provides clear and precise explanations of Python concepts, but some examples may lack necessary detail or context."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The document appears to maintain internal consistency and proper referential integrity."
+        },
+        "conformity": {
+          "score": 90,
+          "evidence": "The document generally follows standard Python conventions and best practices, but some formatting inconsistencies are present."
+        },
+        "interpretability": {
+          "score": 85,
+          "evidence": "The document uses clear language and examples to explain Python concepts, but some sections may be difficult for beginners to understand."
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "The document lacks clear provenance, with no information about its author, creation date, or version history."
+        },
+        "credibility": {
+          "score": 80,
+          "evidence": "The document appears credible based on its content, but its origin and author are unknown."
+        },
+        "fitness_for_use": {
+          "score": 70,
+          "evidence": "The document contains useful information for technical tasks, but its applicability to specific business or legal tasks is limited."
+        },
+        "value": {
+          "score": 75,
+          "evidence": "The document has educational value for learning Python, but its direct business benefit or risk is unclear."
+        }
+      },
+      "document_id": "Python_123.docx",
+      "document_type": "Technical Documentation",
+      "summary": "This document contains Python programming language basics, including data types, operations, functions, and control structures.",
+      "context": "The document appears to be a technical tutorial or set of notes on Python programming concepts.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "programming",
+          "data types",
+          "operations",
+          "functions",
+          "control structures"
+        ],
+        "key_terms": [
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None"
+        ]
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "unstructure_classification_test_doc1.pdf",
+      "status": "success",
+      "processed_at": "2025-12-05T02:49:57.312214Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 0,
+          "evidence": "Cannot assess accuracy without access to the document content."
+        },
+        "completeness": {
+          "score": 0,
+          "evidence": "Cannot assess completeness without access to the document content."
+        },
+        "consistency": {
+          "score": 0,
+          "evidence": "Cannot assess consistency without access to the document content."
+        },
+        "timeliness": {
+          "score": 0,
+          "evidence": "Cannot assess timeliness without access to the document content."
+        },
+        "validity": {
+          "score": 0,
+          "evidence": "Cannot assess validity without access to the document content."
+        },
+        "uniqueness": {
+          "score": 0,
+          "evidence": "Cannot assess uniqueness without access to the document content."
+        },
+        "reliability": {
+          "score": 0,
+          "evidence": "Cannot assess reliability without access to the document content."
+        },
+        "relevance": {
+          "score": 0,
+          "evidence": "Cannot assess relevance without access to the document content."
+        },
+        "accessibility": {
+          "score": 50,
+          "evidence": "Document is a PDF, but the number of pages/slides is unknown and the content is not provided."
+        },
+        "precision": {
+          "score": 0,
+          "evidence": "Cannot assess precision without access to the document content."
+        },
+        "integrity": {
+          "score": 0,
+          "evidence": "Cannot assess integrity without access to the document content."
+        },
+        "conformity": {
+          "score": 0,
+          "evidence": "Cannot assess conformity without access to the document content."
+        },
+        "interpretability": {
+          "score": 0,
+          "evidence": "Cannot assess interpretability without access to the document content."
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "Cannot assess traceability without access to the document content."
+        },
+        "credibility": {
+          "score": 0,
+          "evidence": "Cannot assess credibility without access to the document content."
+        },
+        "fitness_for_use": {
+          "score": 0,
+          "evidence": "Cannot assess fitness for use without access to the document content."
+        },
+        "value": {
+          "score": 0,
+          "evidence": "Cannot assess value without access to the document content."
+        }
+      },
+      "document_id": "unstructure_classification_test_doc1.pdf",
+      "document_type": "Unknown",
+      "summary": "Insufficient information to provide a summary of the document content.",
+      "context": "Insufficient information to explain what this document is about and its purpose.",
+      "metadata": {
+        "people": [
+          "Addy (abcd@mail.com)"
+        ],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [],
+        "key_terms": []
+      }
+    }
+  ]
+}

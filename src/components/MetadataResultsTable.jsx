@@ -201,18 +201,7 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
                             ))}
                             <th style={{ minWidth: '200px' }}>Summary</th>
                             <th style={{ minWidth: '200px' }}>Context</th>
-                            <th>
-                                <div className="quality-score-header">
-                                    Quality Score
-                                    <span className="info-icon">ℹ️</span>
-                                    <span className="tooltip">
-                                        Score (0-100) based on:
-                                        <br />• Completeness of metadata
-                                        <br />• Clarity of content
-                                        <br />• Presence of key entities
-                                    </span>
-                                </div>
-                            </th>
+                            <th>Overall Quality Score</th>
                             <th>
                                 <div className="quality-score-header">
                                     Similarity
@@ -259,9 +248,9 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
                                             : '-'}
                                     </td>
                                     <td>
-                                        {file.quality_score && (
-                                            <span className={`quality-score score-${Math.floor(file.quality_score / 20)}`}>
-                                                {file.quality_score}
+                                        {(file.overall_quality_score || file.quality_score) && (
+                                            <span className={`quality-score score-${Math.floor((file.overall_quality_score || file.quality_score) / 20)}`}>
+                                                {file.overall_quality_score || file.quality_score}
                                             </span>
                                         )}
                                     </td>

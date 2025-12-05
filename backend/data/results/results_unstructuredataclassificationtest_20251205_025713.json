@@ -1,0 +1,419 @@
+{
+  "processed_at": "2025-12-05T02:57:13.304183Z",
+  "total_files": 4,
+  "successful": 4,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:56:20.928871Z",
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 80,
+          "evidence": "The document appears to be accurate in its instructions, but without attempting the steps, it's impossible to confirm with certainty."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The document seems to cover all steps for creating a digital ID, but it's unclear if it includes all necessary information due to the lack of context."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The document uses consistent terminology throughout."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not have a clear date or version, so it's unclear if it's up-to-date with current software versions."
+        },
+        "validity": {
+          "score": 80,
+          "evidence": "The document appears to use standard formats, but without more context, it's hard to confirm."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The document appears to be unique, not a duplicate."
+        },
+        "reliability": {
+          "score": 50,
+          "evidence": "The source and process of the document are unknown, so its reliability is questionable."
+        },
+        "relevance": {
+          "score": 30,
+          "evidence": "The document is not directly relevant to the high-stakes use case specified."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in a standard format (PPTX) and appears to be easily parseable."
+        },
+        "precision": {
+          "score": 80,
+          "evidence": "The document provides detailed steps, but the precision of these steps cannot be confirmed without more context."
+        },
+        "integrity": {
+          "score": 80,
+          "evidence": "The document appears to maintain its integrity, but without more context, it's hard to confirm."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The document appears to follow a standard tutorial format, but it's unclear if it conforms to specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 90,
+          "evidence": "The document is written in clear language, but some terms may be unclear to those without technical knowledge."
+        },
+        "traceability": {
+          "score": 30,
+          "evidence": "The document has a generic file name and no clear version history or author information."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The document's credibility is questionable due to the lack of clear source information."
+        },
+        "fitness_for_use": {
+          "score": 30,
+          "evidence": "The document does not appear to be highly useful for the specified high-stakes use case."
+        },
+        "value": {
+          "score": 40,
+          "evidence": "The document may have some value for certain use cases, but for the specified high-stakes use case, its value is low."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation providing step-by-step instructions on how to create a new digital ID for use in editable forms.",
+      "context": "This document appears to be a tutorial or guide on creating a digital signature for use in editable forms. It does not seem to contain any financial, legal, or business-critical information.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Digital Signature",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "New digital ID",
+          "Create a new digital ID",
+          "Save to file"
+        ]
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:56:39.895019Z",
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 95,
+          "evidence": "The Python code snippets and explanations appear to be accurate, but without executing the code, it is impossible to confirm with 100% certainty."
+        },
+        "completeness": {
+          "score": 50,
+          "evidence": "The document does not include all Python data types or built-in functions, and it is unclear if it is intended to be a comprehensive guide."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The document consistently uses Python code snippets and explanations throughout."
+        },
+        "timeliness": {
+          "score": 80,
+          "evidence": "The document does not contain any dates, but Python is a relatively stable language, so the information is likely still relevant."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "The Python code snippets follow standard syntax and formatting rules."
+        },
+        "uniqueness": {
+          "score": 80,
+          "evidence": "The document contains standard Python information that can be found in many other sources, but the specific code snippets and explanations may be unique."
+        },
+        "reliability": {
+          "score": 80,
+          "evidence": "The source and process for creating the document are unknown, but the Python code snippets and explanations appear reliable."
+        },
+        "relevance": {
+          "score": 100,
+          "evidence": "The document is directly relevant to learning or teaching Python."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in DOCX format and can be easily opened and read."
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "The Python code snippets and explanations are precise and clear."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The document appears to be complete and unaltered, with no broken references or missing sections."
+        },
+        "conformity": {
+          "score": 100,
+          "evidence": "The document follows standard Python syntax and formatting rules."
+        },
+        "interpretability": {
+          "score": 100,
+          "evidence": "The Python code snippets and explanations are clear and easy to understand."
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "The document does not include any information about its origin or version history."
+        },
+        "credibility": {
+          "score": 80,
+          "evidence": "The source and author of the document are unknown, but the Python code snippets and explanations appear credible."
+        },
+        "fitness_for_use": {
+          "score": 90,
+          "evidence": "The document is useful for learning or teaching Python, but may not be comprehensive or authoritative enough for more advanced use cases."
+        },
+        "value": {
+          "score": 80,
+          "evidence": "The document has value for learning or teaching Python, but its value for more advanced use cases is uncertain."
+        }
+      },
+      "document_id": "Python.docx",
+      "document_type": "Technical Documentation",
+      "summary": "This document contains Python code snippets, explanations of Python data types, and examples of Python operations. It also includes information about Python keywords and built-in functions.",
+      "context": "This document appears to be a Python tutorial or reference guide, with a focus on basic Python syntax and data types.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "data types",
+          "operations",
+          "keywords",
+          "built-in functions"
+        ],
+        "key_terms": [
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "list",
+          "tuple",
+          "set",
+          "range"
+        ]
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "unstructure_classification_test_doc1.pdf",
+      "status": "success",
+      "processed_at": "2025-12-05T02:56:54.106758Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 0,
+          "evidence": "Cannot assess accuracy without access to the document content."
+        },
+        "completeness": {
+          "score": 0,
+          "evidence": "Cannot assess completeness without access to the document content."
+        },
+        "consistency": {
+          "score": 0,
+          "evidence": "Cannot assess consistency without access to the document content."
+        },
+        "timeliness": {
+          "score": 0,
+          "evidence": "Cannot assess timeliness without access to the document content."
+        },
+        "validity": {
+          "score": 0,
+          "evidence": "Cannot assess validity without access to the document content."
+        },
+        "uniqueness": {
+          "score": 0,
+          "evidence": "Cannot assess uniqueness without access to the document content."
+        },
+        "reliability": {
+          "score": 0,
+          "evidence": "Cannot assess reliability without access to the document content."
+        },
+        "relevance": {
+          "score": 0,
+          "evidence": "Cannot assess relevance without access to the document content."
+        },
+        "accessibility": {
+          "score": 50,
+          "evidence": "Document is a PDF, but the number of pages/slides is unknown and no text extraction was provided."
+        },
+        "precision": {
+          "score": 0,
+          "evidence": "Cannot assess precision without access to the document content."
+        },
+        "integrity": {
+          "score": 0,
+          "evidence": "Cannot assess integrity without access to the document content."
+        },
+        "conformity": {
+          "score": 0,
+          "evidence": "Cannot assess conformity without access to the document content."
+        },
+        "interpretability": {
+          "score": 0,
+          "evidence": "Cannot assess interpretability without access to the document content."
+        },
+        "traceability": {
+          "score": 10,
+          "evidence": "Only the document owner's email address is known. No other metadata provided."
+        },
+        "credibility": {
+          "score": 0,
+          "evidence": "Cannot assess credibility without access to the document content."
+        },
+        "fitness_for_use": {
+          "score": 0,
+          "evidence": "Cannot assess fitness for use without access to the document content."
+        },
+        "value": {
+          "score": 0,
+          "evidence": "Cannot assess value without access to the document content."
+        }
+      },
+      "document_id": "unstructure_classification_test_doc1.pdf",
+      "document_type": "Unknown",
+      "summary": "Insufficient information to provide a summary of the document content.",
+      "context": "Insufficient information to provide a context of what this document is about and its purpose.",
+      "metadata": {
+        "people": [
+          "Addy (abcd@mail.com)"
+        ],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [],
+        "key_terms": []
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-05T02:57:13.301584Z",
+      "embedding": [],
+      "overall_quality_score": 50,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 85,
+          "evidence": "The code snippets and explanations appear mostly accurate, but some minor errors (e.g., incorrect output comments) are present."
+        },
+        "completeness": {
+          "score": 50,
+          "evidence": "The document covers basic Python concepts but does not provide comprehensive coverage of the language or its libraries."
+        },
+        "consistency": {
+          "score": 80,
+          "evidence": "Formatting and style are generally consistent, but there are some variations in commenting and indentation."
+        },
+        "timeliness": {
+          "score": 0,
+          "evidence": "No clear indication of when the document was created or last updated, and no reference to specific Python versions."
+        },
+        "validity": {
+          "score": 80,
+          "evidence": "Most code snippets follow proper syntax and structure, but some examples contain minor errors."
+        },
+        "uniqueness": {
+          "score": 50,
+          "evidence": "The content appears to be a generic tutorial or set of notes, which may be similar to other resources available online."
+        },
+        "reliability": {
+          "score": 50,
+          "evidence": "The source and author of the document are unknown, making it difficult to assess its reliability."
+        },
+        "relevance": {
+          "score": 70,
+          "evidence": "The document is relevant to Python programming but may not be directly applicable to specific business purposes or AI/ML tasks."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in DOCX format, which can be easily opened and parsed using standard tools."
+        },
+        "precision": {
+          "score": 70,
+          "evidence": "Concepts are explained with a reasonable level of detail, but some explanations may be too brief or oversimplified."
+        },
+        "integrity": {
+          "score": 80,
+          "evidence": "The document appears to be self-contained, but some code snippets may rely on previously defined variables or imports."
+        },
+        "conformity": {
+          "score": 70,
+          "evidence": "The document generally follows Python conventions and best practices, but there are some inconsistencies."
+        },
+        "interpretability": {
+          "score": 80,
+          "evidence": "The document is mostly clear and easy to understand, but some explanations could be improved."
+        },
+        "traceability": {
+          "score": 0,
+          "evidence": "No clear provenance or version history is provided for the document."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The document's credibility is uncertain due to the lack of information about its source and author."
+        },
+        "fitness_for_use": {
+          "score": 60,
+          "evidence": "The document may be useful for learning basic Python concepts, but it may not be directly applicable to specific AI/ML tasks or business purposes."
+        },
+        "value": {
+          "score": 60,
+          "evidence": "The document has some educational value, but its practical value for AI/ML tasks or business purposes is limited."
+        }
+      },
+      "document_id": "Python_123.docx",
+      "document_type": "Technical Documentation",
+      "summary": "This document contains Python code snippets and explanations for various concepts such as data types, variables, functions, and control structures.",
+      "context": "The document appears to be a tutorial or set of notes on Python programming, covering basic concepts and providing examples.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "Programming",
+          "Data Types",
+          "Variables",
+          "Functions",
+          "Control Structures"
+        ],
+        "key_terms": [
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "list",
+          "tuple",
+          "set",
+          "range"
+        ]
+      }
+    }
+  ]
+}

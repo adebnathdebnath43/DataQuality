@@ -110,6 +110,8 @@ class BedrockService:
 
 Your task: Carefully analyze the provided unstructured document (and its metadata, summary, and extraction notes) and assign an accurate numerical score from 0 to 100 for ALL 17 dimensions below. You must use the exact definitions, real-world anchor examples, and scoring rubrics provided. Never invent dimensions. Never skip one.
 
+IMPORTANT: For each dimension's "evidence" field, provide 1-2 sentences explaining what you found in the document and why you assigned that score.
+
 You are not allowed to be lenient. If in doubt, score lower and explain why.
 
 RETURN ONLY STRICTLY VALID JSON — nothing else, no markdown, no extra text.
@@ -213,26 +215,37 @@ Consequence of bad data: Real money lost, deals killed, regulatory violations
 
 {{
   "document_id": "{file_name}",
+  "document_type": "Contract|Financial Report|Presentation|Email|Legal Document|Technical Documentation|Other",
   "overall_quality_score": 75,
   "recommended_action": "KEEP",
+  "summary": "Brief 2-3 sentence summary of the document content",
+  "context": "Brief explanation of what this document is about and its purpose",
+  "metadata": {{
+    "people": ["List of people mentioned"],
+    "organizations": ["List of organizations mentioned"],
+    "locations": ["List of locations mentioned"],
+    "dates": ["Important dates found"],
+    "topics": ["Main topics covered"],
+    "key_terms": ["Important technical terms or concepts"]
+  }},
   "dimensions": {{
-    "Accuracy": {{"score": 95, "evidence": "One minor typo '20244' instead of '2024' but context clear"}},
-    "Completeness": {{"score": 100, "evidence": "All pages present"}},
-    "Consistency": {{"score": 85, "evidence": "Minor font change"}},
-    "Timeliness": {{"score": 100, "evidence": "Latest version"}},
-    "Validity": {{"score": 100, "evidence": "Valid formats"}},
-    "Uniqueness": {{"score": 100, "evidence": "Unique version"}},
-    "Reliability": {{"score": 100, "evidence": "Trusted source"}},
-    "Relevance": {{"score": 100, "evidence": "On topic"}},
-    "Accessibility": {{"score": 100, "evidence": "Text selectable"}},
-    "Precision": {{"score": 98, "evidence": "Proper decimals"}},
-    "Integrity": {{"score": 100, "evidence": "Totals add up"}},
-    "Conformity": {{"score": 95, "evidence": "Template matched"}},
-    "Interpretability": {{"score": 90, "evidence": "Defined terms"}},
-    "Traceability": {{"score": 100, "evidence": "Clear version history"}},
-    "Credibility": {{"score": 100, "evidence": "Executed counterpart"}},
-    "Fitness_for_Use": {{"score": 97, "evidence": "High density of useful content"}},
-    "Value": {{"score": 85, "evidence": "Minor PII risk"}}
+    "Accuracy": {{"score": 95, "evidence": "Found one minor typo '20244' instead of '2024' on page 3, but all other dates, names, and numbers are accurate. No material factual errors detected."}},
+    "Completeness": {{"score": 100, "evidence": "All pages and required sections present: Executive Summary, Terms, Schedules A-D, Signatures. No missing exhibits or appendices."}},
+    "Consistency": {{"score": 85, "evidence": "Minor formatting inconsistency with section headers changing font from Arial to Calibri. Entity names and terminology are consistent throughout."}},
+    "Timeliness": {{"score": 100, "evidence": "Document is marked 'FINAL EXECUTED VERSION' with signature date of 11/15/2024. Represents current binding agreement."}},
+    "Validity": {{"score": 100, "evidence": "All dates follow MM/DD/YYYY format. Phone numbers, emails, and currency amounts use proper formatting. No structural violations."}},
+    "Uniqueness": {{"score": 100, "evidence": "Unique document with specific deal terms and parties not found in other documents. Filename indicates sole executed copy."}},
+    "Reliability": {{"score": 100, "evidence": "Document from law firm Wilson Sonsini (watermark on footer), signed by authorized officers. Highly trustworthy source."}},
+    "Relevance": {{"score": 100, "evidence": "Directly relevant to M&A due diligence with acquisition terms, purchase price, and representations. Core business document."}},
+    "Accessibility": {{"score": 100, "evidence": "PDF with embedded selectable text, no password protection or DRM. Can be extracted and parsed without issues."}},
+    "Precision": {{"score": 98, "evidence": "Purchase price to exact dollar ($12,500,000.00), share counts and interest rates precise. One revenue figure rounded."}},
+    "Integrity": {{"score": 100, "evidence": "All cross-references verified, page numbers sequential, ownership percentages sum to 100.0%. No broken references."}},
+    "Conformity": {{"score": 95, "evidence": "Follows standard SPA template with Recitals, Terms, Reps & Warranties, Covenants. Missing 'Survival' clause."}},
+    "Interpretability": {{"score": 90, "evidence": "Most terms defined in Section 1, key acronyms explained. Some legal terms undefined but comprehensible with legal background."}},
+    "Traceability": {{"score": 100, "evidence": "File metadata shows creator (jsmith@lawfirm.com), creation/modification dates. Filename includes execution date. Full audit trail."}},
+    "Credibility": {{"score": 100, "evidence": "Executed by authorized signatories with notarized signatures. Law firm opinion letter attached. Bears letterhead and reference number."}},
+    "Fitness_for_Use": {{"score": 97, "evidence": "Dense substantive content with 8,500 words of material terms and schedules. Minimal boilerplate (~10%). Excellent for AI use."}},
+    "Value": {{"score": 85, "evidence": "High business value for M&A analysis. Low risk except Contains SSNs on Schedule B (PII concern requiring redaction)."}}
   }}
 }}
 
@@ -253,7 +266,7 @@ Return ONLY the JSON above. Begin immediately.
             # Claude format
             body = json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 1000,
+                "max_tokens": 4000,
                 "messages": [
                     {
                         "role": "user",
@@ -265,7 +278,7 @@ Return ONLY the JSON above. Begin immediately.
             # Mistral format
             body = json.dumps({
                 "prompt": f"<s>[INST] {prompt} [/INST]",
-                "max_tokens": 1000,
+                "max_tokens": 4000,
                 "temperature": 0.7,
                 "top_p": 0.9
             })
@@ -273,7 +286,7 @@ Return ONLY the JSON above. Begin immediately.
             # Generic format (try Claude format as fallback)
             body = json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 1000,
+                "max_tokens": 4000,
                 "messages": [
                     {
                         "role": "user",
@@ -354,12 +367,24 @@ Return ONLY the JSON above. Begin immediately.
                 return obj
 
             if json_str:
-                parsed = json.loads(json_str)
-                print(f"[DEBUG] Parsed JSON keys: {parsed.keys()}")
-                print(f"[DEBUG] Has dimensions: {'dimensions' in parsed}")
-                return _ensure_17_dimensions(parsed)
+                try:
+                    parsed = json.loads(json_str)
+                    print(f"[DEBUG] Parsed JSON keys: {parsed.keys()}")
+                    print(f"[DEBUG] Has dimensions: {'dimensions' in parsed}")
+                    return _ensure_17_dimensions(parsed)
+                except json.JSONDecodeError as je:
+                    print(f"[ERROR] JSON parsing failed: {str(je)}")
+                    print(f"[ERROR] Attempted to parse: {json_str[:1000]}")
+                    # Fallback with error info
+                    return _ensure_17_dimensions({
+                        "summary": "JSON parsing failed",
+                        "context": "",
+                        "dimensions": {},
+                        "error": str(je)
+                    })
             else:
                 # Fallback: build minimal structure with defaults
+                print(f"[ERROR] No JSON found in response. Full response: {result_text[:1000]}")
                 fallback = {
                     "summary": "Model returned no parseable JSON. Using defaults.",
                     "context": "",
@@ -380,12 +405,18 @@ Return ONLY the JSON above. Begin immediately.
         """
         Generate embedding for text using Titan Embeddings v1.
         """
-        client = self._get_client(region, access_key, secret_key, role_arn)
-        model_id = "amazon.titan-embed-text-v1"
-        
         try:
+            client = self._get_client(region, access_key, secret_key, role_arn)
+            model_id = "amazon.titan-embed-text-v1"
+            
+            # Truncate text if too long (Titan has input limit)
+            max_chars = 8000
+            truncated_text = text[:max_chars] if len(text) > max_chars else text
+            
+            print(f"[DEBUG] Generating embedding for text of length {len(truncated_text)}")
+            
             body = json.dumps({
-                "inputText": text
+                "inputText": truncated_text
             })
             
             response = client.invoke_model(
@@ -394,8 +425,12 @@ Return ONLY the JSON above. Begin immediately.
             )
             
             response_body = json.loads(response['body'].read())
-            return response_body['embedding']
+            embedding = response_body.get('embedding', [])
+            print(f"[DEBUG] Embedding generated successfully. Length: {len(embedding)}")
+            return embedding
             
         except Exception as e:
-            print(f"Error generating embedding: {str(e)}")
+            print(f"[ERROR] Error generating embedding: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return []

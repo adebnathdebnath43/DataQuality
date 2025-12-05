@@ -75,6 +75,32 @@ class MetadataService:
             except UnicodeDecodeError:
                 return f"Error: Binary file {file_ext} not supported for text extraction"
 
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors"""
+        try:
+            import math
+            
+            # Ensure vectors are same length
+            if len(vec1) != len(vec2):
+                return 0.0
+            
+            # Calculate dot product
+            dot_product = sum(a * b for a, b in zip(vec1, vec2))
+            
+            # Calculate magnitudes
+            magnitude1 = math.sqrt(sum(a * a for a in vec1))
+            magnitude2 = math.sqrt(sum(b * b for b in vec2))
+            
+            # Avoid division by zero
+            if magnitude1 == 0 or magnitude2 == 0:
+                return 0.0
+            
+            # Calculate cosine similarity
+            return dot_product / (magnitude1 * magnitude2)
+        except Exception as e:
+            self._log(f"Error calculating cosine similarity: {str(e)}")
+            return 0.0
+    
     def _log(self, msg: str):
         try:
             with open("C:/Users/soumi/Downloads/DataQuality/backend/debug_absolute.log", "a") as f:
@@ -198,21 +224,38 @@ class MetadataService:
                 # 3.5 Generate Embedding
                 embedding = []
                 try:
-                    # Create text to embed: Summary + Topics
+                    # Create text to embed: ALL metadata fields + summary + context
                     summary = analysis.get("summary", "")
-                    topics_raw = analysis.get("metadata", {}).get("topics", [])
+                    context = analysis.get("context", "")
+                    document_type = analysis.get("document_type", "")
                     
-                    # Handle both string and array formats from Mistral
-                    if isinstance(topics_raw, str):
-                        topics = topics_raw
-                    elif isinstance(topics_raw, list):
-                        topics = ", ".join(topics_raw)
-                    else:
-                        topics = ""
+                    # Extract all metadata fields
+                    metadata = analysis.get("metadata", {})
+                    metadata_parts = []
                     
-                    text_to_embed = f"Summary: {summary}\nTopics: {topics}"
+                    for key, value in metadata.items():
+                        if isinstance(value, str):
+                            metadata_parts.append(f"{key}: {value}")
+                        elif isinstance(value, list):
+                            metadata_parts.append(f"{key}: {', '.join(str(v) for v in value)}")
+                        else:
+                            metadata_parts.append(f"{key}: {str(value)}")
                     
-                    self._log("Generating embedding...")
+                    metadata_text = "\n".join(metadata_parts)
+                    
+                    # Combine all content for comprehensive embedding
+                    text_to_embed = f"""Document Type: {document_type}
+
+Summary: {summary}
+
+Context: {context}
+
+Metadata:
+{metadata_text}
+
+Full Content (truncated): {text_content[:2000]}"""
+                    
+                    self._log(f"Generating embedding for comprehensive content (text length: {len(text_to_embed)})...")
                     embedding = self.bedrock_service.get_embedding(
                         text=text_to_embed,
                         region=region,
@@ -220,13 +263,14 @@ class MetadataService:
                         secret_key=secret_key,
                         role_arn=role_arn
                     )
-                    self._log(f"Embedding generated. Length: {len(embedding)}")
+                    self._log(f"Embedding generated. Length: {len(embedding)}, First 3 values: {embedding[:3] if embedding else 'EMPTY'}")
                 except Exception as embed_err:
                     self._log(f"Embedding generation failed: {str(embed_err)}")
+                    import traceback
+                    self._log(traceback.format_exc())
 
                 # 3.6 Validate and extract dimensions
                 dimensions = {}
-                overall_quality_score = analysis.get("overall_quality_score", analysis.get("quality_score", 50))
                 recommended_action = analysis.get("recommended_action", "REVIEW")
                 
                 if "dimensions" in analysis and isinstance(analysis["dimensions"], dict):
@@ -236,6 +280,11 @@ class MetadataService:
                     # If LLM didn't return dimensions, create defaults
                     self._log("No dimensions in response, using defaults")
                     dimensions = self._validate_dimensions({})
+                
+                # 3.7 Calculate overall quality score from dimensions (average of all 17 dimensions)
+                dimension_values = [dim.get("score", 50) for dim in dimensions.values()]
+                overall_quality_score = round(sum(dimension_values) / len(dimension_values)) if dimension_values else 50
+                self._log(f"Overall quality score calculated: {overall_quality_score}")
 
                 # 4. Store analysis as individual JSON file
                 file_analysis = {
@@ -290,6 +339,62 @@ class MetadataService:
                 })
 
         self._log(f"Processing complete. Processed {len(file_analyses)} files.")
+        
+        # 4. Calculate cosine similarity for duplicate detection (>95%)
+        self._log("=" * 80)
+        self._log("STARTING COSINE SIMILARITY CALCULATIONS FOR DUPLICATE DETECTION")
+        self._log("=" * 80)
+        successful_files = [f for f in file_analyses if f.get("status") == "success" and f.get("embedding")]
+        
+        self._log(f"Files with embeddings: {len(successful_files)} out of {len(file_analyses)} total files")
+        
+        if len(successful_files) < 2:
+            self._log("Not enough files with embeddings to calculate similarity. Need at least 2 files.")
+        else:
+            total_comparisons = 0
+            duplicates_found = 0
+            
+            for i, file1 in enumerate(successful_files):
+                potential_duplicates = []
+                embedding1 = file1.get("embedding", [])
+                
+                if not embedding1 or len(embedding1) == 0:
+                    self._log(f"Skipping {file1.get('file_name')} - empty embedding")
+                    continue
+                
+                for j, file2 in enumerate(successful_files):
+                    if i == j:  # Skip comparing with itself
+                        continue
+                    
+                    embedding2 = file2.get("embedding", [])
+                    if not embedding2 or len(embedding2) == 0:
+                        continue
+                    
+                    # Calculate cosine similarity
+                    similarity = self._cosine_similarity(embedding1, embedding2)
+                    total_comparisons += 1
+                    
+                    self._log(f"Comparing: {file1.get('file_name')} <-> {file2.get('file_name')}: {round(similarity * 100, 2)}%")
+                    
+                    # Flag as potential duplicate if similarity > 95%
+                    if similarity > 0.95:
+                        duplicates_found += 1
+                        potential_duplicates.append({
+                            "file_name": file2.get("file_name"),
+                            "file_key": file2.get("file_key"),
+                            "similarity": round(similarity * 100, 2)  # Convert to percentage
+                        })
+                        self._log(f"⚠️  DUPLICATE DETECTED: {file1.get('file_name')} <-> {file2.get('file_name')} ({round(similarity * 100, 2)}%)")
+                
+                # Sort by similarity (highest first) and add to file analysis
+                if potential_duplicates:
+                    potential_duplicates.sort(key=lambda x: x["similarity"], reverse=True)
+                    file1["potential_duplicates"] = potential_duplicates
+                    self._log(f"File '{file1.get('file_name')}' has {len(potential_duplicates)} potential duplicate(s)")
+            
+            self._log(f"Duplicate detection complete. Total comparisons: {total_comparisons}, Duplicates found: {duplicates_found}")
+        
+        self._log("=" * 80)
         
         # Return results with full analysis data for immediate UI display
         # We attach the full analysis list to the first result so the UI can grab it easily
