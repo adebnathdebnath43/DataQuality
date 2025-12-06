@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 import json
 import io
 import datetime
+from pathlib import Path
 from app.services.s3 import S3Service
 from app.services.bedrock import BedrockService
 
@@ -20,6 +21,9 @@ try:
     from pptx import Presentation
 except ImportError:
     Presentation = None
+
+LOG_PATH = Path(__file__).resolve().parents[2] / "debug_absolute.log"
+
 
 class MetadataService:
     def __init__(self):
@@ -103,7 +107,7 @@ class MetadataService:
     
     def _log(self, msg: str):
         try:
-            with open("C:/Users/soumi/Downloads/DataQuality/backend/debug_absolute.log", "a") as f:
+            with open(LOG_PATH, "a", encoding="utf-8") as f:
                 f.write(f"{datetime.datetime.now()}: {msg}\n")
         except Exception as e:
             print(f"Logging failed: {e}")
@@ -358,7 +362,7 @@ Full Content (truncated): {text_content[:2000]}"""
 
                 # 3.6 Validate and extract dimensions
                 dimensions = {}
-                recommended_action = analysis.get("recommended_action", "REVIEW")
+                recommended_action = (analysis.get("recommended_action") or "").strip().upper()
                 
                 if "dimensions" in analysis and isinstance(analysis["dimensions"], dict):
                     dimensions = self._validate_dimensions(analysis["dimensions"])
@@ -417,6 +421,18 @@ Full Content (truncated): {text_content[:2000]}"""
                 overall_quality_score = round(sum(dimension_values) / len(dimension_values)) if dimension_values else 50
                 self._log(f"Overall quality score calculated: {overall_quality_score}")
 
+                # 3.8 Derive recommended action if LLM did not provide one
+                if recommended_action not in {"KEEP", "REVIEW", "QUARANTINE", "DISCARD"}:
+                    if overall_quality_score >= 85:
+                        recommended_action = "KEEP"
+                    elif overall_quality_score >= 70:
+                        recommended_action = "REVIEW"
+                    elif overall_quality_score >= 60:
+                        recommended_action = "QUARANTINE"
+                    else:
+                        recommended_action = "DISCARD"
+                self._log(f"Recommended action: {recommended_action}")
+
                 # 4. Store analysis as individual JSON file
                 file_analysis = {
                     "file_key": key,
@@ -428,6 +444,7 @@ Full Content (truncated): {text_content[:2000]}"""
                     "embedding": embedding,
                     "overall_quality_score": overall_quality_score,
                     "recommended_action": recommended_action,
+                    "bucket": bucket,
                     **analysis,
                     # Ensure our adjusted dimensions override any LLM-provided ones
                     "dimensions": dimensions,

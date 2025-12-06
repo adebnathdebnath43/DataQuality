@@ -11,6 +11,75 @@ from app.services.bedrock import BedrockService
 import glob
 import json
 import datetime
+import os
+from pathlib import Path
+
+# Resolve results directory from env or project structure (works on local and cloud)
+RESULTS_DIR = Path(os.getenv("RESULTS_DIR", Path(__file__).resolve().parents[2] / "data" / "results")).resolve()
+LOG_PATH = Path(__file__).resolve().parents[2] / "debug_absolute.log"
+
+
+def _set_action_across_results(file_name: str, action: str, approvals_count: int = None):
+    """Propagate recommended_action (and approvals count) to all recent result files for a given file name."""
+    results_dir = str(RESULTS_DIR)
+    for filepath in glob.glob(f"{results_dir}/*.json"):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            changed = False
+            for file_data in data.get("files", []):
+                if file_data.get("file_name") == file_name:
+                    file_data["recommended_action"] = action
+                    if approvals_count is not None:
+                        file_data["approvals"] = approvals_count
+                    changed = True
+            if changed:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2)
+        except Exception:
+            continue
+
+
+def _collect_actions_snapshot():
+    """Scan all result files to compute max approvals and latest action per file name."""
+    results_dir = str(RESULTS_DIR)
+    snapshot = {}
+    for filepath in glob.glob(f"{results_dir}/*.json"):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            continue
+        processed_at = data.get("processed_at")
+        for file_data in data.get("files", []):
+            name = file_data.get("file_name")
+            if not name:
+                continue
+            approvals = file_data.get("approvals") or 0
+            if not approvals and isinstance(file_data.get("dimension_approvals"), dict):
+                approvals = sum(1 for v in file_data["dimension_approvals"].values() if str(v.get("status", "")).lower() == "approved")
+            action = (file_data.get("recommended_action") or "REVIEW").upper()
+            current = snapshot.get(name)
+            # Prefer higher approvals; tie-breaker by latest processed_at
+            should_update = False
+            if current is None or approvals > current["approvals"]:
+                should_update = True
+            elif approvals == current.get("approvals"):
+                # compare timestamps when available
+                try:
+                    ts_new = datetime.datetime.fromisoformat((processed_at or "").replace('Z', '+00:00')) if processed_at else None
+                    ts_old = current.get("processed_at")
+                    if ts_old is None or (ts_new and ts_new > ts_old):
+                        should_update = True
+                except Exception:
+                    pass
+            if should_update:
+                try:
+                    ts_parsed = datetime.datetime.fromisoformat((processed_at or "").replace('Z', '+00:00')) if processed_at else None
+                except Exception:
+                    ts_parsed = None
+                snapshot[name] = {"approvals": approvals, "action": action, "processed_at": ts_parsed}
+    return snapshot
 
 router = APIRouter()
 metadata_service = MetadataService()
@@ -33,7 +102,7 @@ async def extract_metadata(request: ExtractMetadataRequest):
     Returns processing results for all files
     """
     try:
-        with open("C:/Users/soumi/Downloads/DataQuality/backend/debug_absolute.log", "a") as f:
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
             f.write(f"Endpoint hit: extract-metadata\n")
             f.write(f"Request: {request}\n")
             
@@ -382,7 +451,7 @@ async def get_dashboard_metrics():
         from collections import defaultdict
         
         # Get all local result files from last 7 days
-        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        results_dir = str(RESULTS_DIR)
         seven_days_ago = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
         
         all_files = []
@@ -390,6 +459,9 @@ async def get_dashboard_metrics():
         dimension_totals = defaultdict(int)
         dimension_counts = defaultdict(int)
         bucket_name = None
+
+        # Precompute best approvals/action snapshot across all result files
+        action_snapshot = _collect_actions_snapshot()
         
         # Read all result files
         for filepath in glob.glob(f"{results_dir}/*.json"):
@@ -397,11 +469,16 @@ async def get_dashboard_metrics():
                 with open(filepath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     
-                # Extract bucket name from first file
-                if not bucket_name and data.get("files"):
-                    file_key = data["files"][0].get("file_key", "")
-                    if "s3://" in file_key:
-                        bucket_name = file_key.split("/")[2]
+                # Extract bucket name from file-level metadata (priority), then s3:// URL; avoid using plain filenames as bucket
+                bucket_field = None
+                if data.get("files"):
+                    bucket_field = data["files"][0].get("bucket")
+                    file_key = data["files"][0].get("file_key", "") or ""
+                    if not bucket_name:
+                        if bucket_field:
+                            bucket_name = bucket_field
+                        elif file_key.startswith("s3://"):
+                            bucket_name = file_key.split("/")[2]
                     
                 # Check if file is from last 7 days
                 processed_at = data.get("processed_at", "")
@@ -432,13 +509,32 @@ async def get_dashboard_metrics():
                                         dimension_totals[dim_name] += dim_data.get("score", 0)
                                         dimension_counts[dim_name] += 1
                                 
+                                approvals = file_data.get("approvals") or 0
+                                if not approvals and isinstance(file_data.get("dimension_approvals"), dict):
+                                    approvals = sum(1 for v in file_data["dimension_approvals"].values() if str(v.get("status", "")).lower() == "approved")
+
+                                rec_action = (file_data.get("recommended_action") or "REVIEW").upper()
+                                # Override with snapshot if higher approvals or APPROVED captured elsewhere
+                                snapshot = action_snapshot.get(file_data.get("file_name"))
+                                if snapshot:
+                                    if snapshot.get("approvals", 0) > approvals:
+                                        approvals = snapshot.get("approvals", approvals)
+                                        rec_action = snapshot.get("action", rec_action)
+                                    elif snapshot.get("approvals", 0) == approvals and snapshot.get("action") == "APPROVED":
+                                        rec_action = "APPROVED"
+
+                                if approvals >= 7:
+                                    rec_action = "APPROVED"
+
                                 all_files.append({
                                     "file_name": file_data.get("file_name"),
                                     "file_key": file_data.get("file_key", ""),
                                     "quality_score": quality,
                                     "processed_at": processed_at,
-                                    "recommended_action": file_data.get("recommended_action", "REVIEW"),
-                                    "dimensions": file_data.get("dimensions", {})
+                                    "recommended_action": rec_action,
+                                    "bucket": file_data.get("bucket") or bucket_field or bucket_name,
+                                    "dimensions": file_data.get("dimensions", {}),
+                                    "approvals": approvals
                                 })
             except Exception as e:
                 print(f"Error reading {filepath}: {e}")
@@ -489,18 +585,27 @@ async def approve_dimension(request: Request):
             raise HTTPException(status_code=400, detail="file_name and dimension_name required")
         
         # Find the result file
-        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        results_dir = str(RESULTS_DIR)
         result_file = None
-        
+        latest_ts = None
+
         for filepath in glob.glob(f"{results_dir}/*.json"):
             with open(filepath, 'r', encoding='utf-8') as f:
                 result_data = json.load(f)
-                for file_data in result_data.get("files", []):
-                    if file_data.get("file_name") == file_name:
-                        result_file = filepath
-                        break
-                if result_file:
-                    break
+                match_found = any(file_data.get("file_name") == file_name for file_data in result_data.get("files", []))
+                if not match_found:
+                    continue
+
+                # Prefer the most recent processed_at when multiple result files contain the same file name
+                try:
+                    ts = result_data.get("processed_at") or ""
+                    ts_parsed = datetime.datetime.fromisoformat(ts.replace('Z', '+00:00')) if ts else None
+                except Exception:
+                    ts_parsed = None
+
+                if latest_ts is None or (ts_parsed and ts_parsed > latest_ts):
+                    latest_ts = ts_parsed
+                    result_file = filepath
         
         if not result_file:
             raise HTTPException(status_code=404, detail="File not found")
@@ -508,7 +613,8 @@ async def approve_dimension(request: Request):
         # Update the dimension approval status
         with open(result_file, 'r', encoding='utf-8') as f:
             result_data = json.load(f)
-        
+
+        approvals_count = 0
         for file_data in result_data.get("files", []):
             if file_data.get("file_name") == file_name:
                 if "dimension_approvals" not in file_data:
@@ -517,11 +623,19 @@ async def approve_dimension(request: Request):
                     "status": "approved",
                     "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
+                approvals_count = sum(1 for v in file_data["dimension_approvals"].values() if str(v.get("status", "")).lower() == "approved")
+                file_data["approvals"] = approvals_count
+                if approvals_count >= 7:
+                    file_data["recommended_action"] = "APPROVED"
                 break
-        
+
         # Save updated data
         with open(result_file, 'w', encoding='utf-8') as f:
             json.dump(result_data, f, indent=2)
+
+        # Propagate action to other result files so dashboard picks it up
+        if approvals_count >= 7:
+            _set_action_across_results(file_name, "APPROVED", approvals_count)
         
         return {"status": "success", "message": f"Dimension {dimension_name} approved"}
     
@@ -543,18 +657,26 @@ async def reject_dimension(request: Request):
             raise HTTPException(status_code=400, detail="file_name and dimension_name required")
         
         # Find the result file
-        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        results_dir = str(RESULTS_DIR)
         result_file = None
-        
+        latest_ts = None
+
         for filepath in glob.glob(f"{results_dir}/*.json"):
             with open(filepath, 'r', encoding='utf-8') as f:
                 result_data = json.load(f)
-                for file_data in result_data.get("files", []):
-                    if file_data.get("file_name") == file_name:
-                        result_file = filepath
-                        break
-                if result_file:
-                    break
+                match_found = any(file_data.get("file_name") == file_name for file_data in result_data.get("files", []))
+                if not match_found:
+                    continue
+
+                try:
+                    ts = result_data.get("processed_at") or ""
+                    ts_parsed = datetime.datetime.fromisoformat(ts.replace('Z', '+00:00')) if ts else None
+                except Exception:
+                    ts_parsed = None
+
+                if latest_ts is None or (ts_parsed and ts_parsed > latest_ts):
+                    latest_ts = ts_parsed
+                    result_file = filepath
         
         if not result_file:
             raise HTTPException(status_code=404, detail="File not found")
@@ -562,7 +684,8 @@ async def reject_dimension(request: Request):
         # Update the dimension rejection status
         with open(result_file, 'r', encoding='utf-8') as f:
             result_data = json.load(f)
-        
+
+        approvals_count = 0
         for file_data in result_data.get("files", []):
             if file_data.get("file_name") == file_name:
                 if "dimension_approvals" not in file_data:
@@ -572,11 +695,18 @@ async def reject_dimension(request: Request):
                     "feedback": feedback,
                     "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
+                approvals_count = sum(1 for v in file_data["dimension_approvals"].values() if str(v.get("status", "")).lower() == "approved")
+                file_data["approvals"] = approvals_count
+                if approvals_count < 7:
+                    file_data["recommended_action"] = "REVIEW"
                 break
-        
+
         # Save updated data
         with open(result_file, 'w', encoding='utf-8') as f:
             json.dump(result_data, f, indent=2)
+
+        if approvals_count < 7:
+            _set_action_across_results(file_name, "REVIEW", approvals_count)
         
         return {"status": "success", "message": f"Dimension {dimension_name} rejected", "feedback": feedback}
     
@@ -603,7 +733,7 @@ async def reanalyze_dimension(request: Request):
             raise HTTPException(status_code=400, detail="Missing required parameters")
         
         # Find the result file to get file_key
-        results_dir = "C:/Users/soumi/Downloads/DataQuality/backend/data/results"
+        results_dir = str(RESULTS_DIR)
         result_file = None
         file_key = None
         file_data_ref = None
