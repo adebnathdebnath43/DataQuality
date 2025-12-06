@@ -1,0 +1,110 @@
+{
+  "processed_at": "2025-12-06T12:14:02.480583Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:14:02.457277Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document appears to be a tutorial or guide on creating a digital signature for use in editable forms.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Digital Signature",
+          "Editable Forms"
+        ],
+        "key_terms": [
+          "New digital ID",
+          "Create",
+          "Save to file",
+          "Password"
+        ]
+      },
+      "dimensions": {
+        "Accuracy": {
+          "score": 100,
+          "evidence": "The document provides a step-by-step guide which appears to be accurate, with no identifiable factual errors."
+        },
+        "Completeness": {
+          "score": 70,
+          "evidence": "The document seems to cover all steps for creating a digital ID, but the number of slides is unknown."
+        },
+        "Consistency": {
+          "score": 100,
+          "evidence": "The document maintains a consistent format and language throughout, with no identified contradictions."
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Upload date (S3) 2025-08-01T15:46:58+00:00 is 126 days old (>30 days); timeliness reduced to 50. The timeliness cannot be determined without a date or version number."
+        },
+        "Validity": {
+          "score": 100,
+          "evidence": "The document follows a logical structure and the steps seem valid."
+        },
+        "Uniqueness": {
+          "score": 100,
+          "evidence": "The document appears to be unique, providing specific instructions for a particular task."
+        },
+        "Reliability": {
+          "score": 70,
+          "evidence": "The reliability is uncertain as the source of the document is not provided."
+        },
+        "Relevance": {
+          "score": 60,
+          "evidence": "The document is somewhat relevant to legal/financial/compliance automation as it discusses digital signatures."
+        },
+        "Accessibility": {
+          "score": 100,
+          "evidence": "The document is in a standard PPTX format, and text extraction was successful."
+        },
+        "Precision": {
+          "score": 100,
+          "evidence": "The document provides precise steps for creating a digital ID."
+        },
+        "Integrity": {
+          "score": 100,
+          "evidence": "The document appears to maintain integrity, with steps logically following each other."
+        },
+        "Conformity": {
+          "score": 80,
+          "evidence": "The document seems to conform to the standard format of a tutorial or guide, but it's unclear if it follows industry standards for digital ID creation."
+        },
+        "Interpretability": {
+          "score": 90,
+          "evidence": "The document is generally clear and understandable, but some terms may be unclear to those unfamiliar with digital signatures."
+        },
+        "Traceability": {
+          "score": 30,
+          "evidence": "The document's origin and version history are unknown."
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "The credibility is uncertain as the source of the document is not provided."
+        },
+        "Fitness_for_Use": {
+          "score": 70,
+          "evidence": "The document seems useful for its intended purpose, but its fitness for high-stakes RAG or LLM fine-tuning is uncertain."
+        },
+        "Value": {
+          "score": 60,
+          "evidence": "The document has potential value for understanding digital signatures, but its risk/cost of ingestion is uncertain without more context."
+        }
+      }
+    }
+  ]
+}

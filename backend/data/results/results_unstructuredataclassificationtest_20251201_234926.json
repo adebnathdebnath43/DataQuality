@@ -95,7 +95,13 @@
         }
       },
       "quality_score": 90,
-      "quality_notes": "The document is well-structured and covers various Python programming topics. However, some code examples lack context, and there is no clear indication of the intended audience or prerequisites for understanding the content."
+      "quality_notes": "The document is well-structured and covers various Python programming topics. However, some code examples lack context, and there is no clear indication of the intended audience or prerequisites for understanding the content.",
+      "dimension_approvals": {
+        "timeliness": {
+          "status": "approved",
+          "timestamp": "2025-12-06T11:30:22.580643+00:00"
+        }
+      }
     },
     {
       "file_key": "unstructure_classification_test_doc1.pdf",

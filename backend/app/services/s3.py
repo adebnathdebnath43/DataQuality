@@ -166,6 +166,25 @@ class S3Service:
             print(f"Error listing S3 objects: {str(e)}")
             raise e
 
+    async def get_object_metadata(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> Dict[str, Any]:
+        """Fetch object metadata such as LastModified and Size."""
+        client = self._get_client(region, access_key, secret_key, role_arn)
+        try:
+            resp = client.head_object(Bucket=bucket, Key=key)
+            return {
+                "last_modified": resp.get("LastModified"),
+                "size": resp.get("ContentLength"),
+                "content_type": resp.get("ContentType"),
+            }
+        except Exception as e:
+            print(f"[S3Service] Error fetching metadata for {bucket}/{key}: {str(e)}")
+            return {
+                "last_modified": None,
+                "size": None,
+                "content_type": None,
+                "error": str(e)
+            }
+
     async def read_file(self, bucket: str, key: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, binary: bool = False) -> Any:
         """Read file content from S3"""
         client = self._get_client(region, access_key, secret_key, role_arn)

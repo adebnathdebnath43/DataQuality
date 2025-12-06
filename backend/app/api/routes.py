@@ -73,9 +73,10 @@ async def list_bedrock_models(region: str = None, access_key: str = None, secret
         print("Accessing /bedrock-models endpoint")
         from app.services.bedrock import BedrockService
         bedrock_service = BedrockService()
-        models = bedrock_service.list_models(region, access_key, secret_key)
-        print(f"Found models: {len(models)}")
-        return {"models": models}
+        result = bedrock_service.list_models(region=region, access_key=access_key, secret_key=secret_key)
+        model_count = len(result.get("models", [])) if isinstance(result, dict) else 0
+        print(f"Found models: {model_count}")
+        return result
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

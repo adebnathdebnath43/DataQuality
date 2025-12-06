@@ -1,0 +1,118 @@
+{
+  "processed_at": "2025-12-06T12:02:15.158191Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:02:15.128337Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 100,
+          "evidence": "All instructions and information provided in the presentation appear to be accurate and correct."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The presentation covers the steps to create a new digital ID, but the number of slides is unknown, so it's unclear if all necessary information is included."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The presentation uses consistent terminology throughout and the steps are presented in a logical order."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not have a clear creation or modification date, so it's unclear if this is the most recent version or if the information is up-to-date."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "The presentation uses standard formatting for instructions and information, and there are no apparent structural violations."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The presentation appears to be unique, providing specific instructions for creating a digital ID in editable forms."
+        },
+        "reliability": {
+          "score": 50,
+          "evidence": "The source of the presentation is unknown, so it's unclear how trustworthy the information is."
+        },
+        "relevance": {
+          "score": 70,
+          "evidence": "The presentation is relevant to creating digital IDs, but may not be directly relevant to all business purposes."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The presentation is in PPTX format and can be extracted and parsed without issues."
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "The steps provided in the presentation are precise and detailed, with clear instructions."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The presentation appears to be complete in itself, with no broken references or missing information within the provided slides."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The presentation follows a standard format for instructional materials, but it's unclear if it conforms to specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 90,
+          "evidence": "The language used in the presentation is clear and understandable, with well-defined steps."
+        },
+        "traceability": {
+          "score": 30,
+          "evidence": "The file metadata does not provide clear information about the creator, creation date, or version history."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The credibility of the presentation is unclear without knowing the source or author."
+        },
+        "fitness_for_use": {
+          "score": 70,
+          "evidence": "The presentation contains useful information, but its fitness for use may depend on the specific business task or AI model."
+        },
+        "value": {
+          "score": 60,
+          "evidence": "The business value of the presentation may vary depending on the specific use case. The risk of ingestion is low, but the potential benefit is also unclear without more context."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document provides a guide on how to create a new digital ID for use in editable forms, including the steps to configure the ID and save it to a file.",
+      "metadata": {
+        "people": [
+          "No specific people mentioned"
+        ],
+        "organizations": [
+          "No specific organizations mentioned"
+        ],
+        "locations": [
+          "No specific locations mentioned"
+        ],
+        "dates": [
+          "No important dates found"
+        ],
+        "topics": [
+          "Digital Signature",
+          "Editable forms",
+          "Creating a new digital ID"
+        ],
+        "key_terms": [
+          "Digital ID",
+          "Editable forms",
+          "Configuration"
+        ]
+      }
+    }
+  ]
+}

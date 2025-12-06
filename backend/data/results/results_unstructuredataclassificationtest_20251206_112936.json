@@ -1,0 +1,237 @@
+{
+  "processed_at": "2025-12-06T11:29:36.002792Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T11:29:13.540399Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 85,
+          "evidence": "The steps provided in the presentation appear to be accurate, but without attempting the process, it's impossible to confirm with 100% certainty."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The presentation appears to cover all steps for creating a digital ID, but it's unclear if there are missing slides or sections."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The presentation uses consistent terminology and formatting throughout."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not have a clear creation or modification date. It's unclear if this is the latest version of the tutorial."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "The presentation uses standard formatting for text and images. No structural violations detected."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The presentation appears to be unique, providing specific instructions for a particular task."
+        },
+        "reliability": {
+          "score": 50,
+          "evidence": "The source of the presentation is unknown, making it difficult to assess its reliability."
+        },
+        "relevance": {
+          "score": 30,
+          "evidence": "The presentation is not directly relevant to the specified use case (high-stakes RAG, LLM fine-tuning, legal/financial/compliance automation)."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The presentation is in a standard format (PPTX) and can be extracted and parsed without issues."
+        },
+        "precision": {
+          "score": 80,
+          "evidence": "The steps in the presentation are precise, but the level of detail is not quantifiable."
+        },
+        "integrity": {
+          "score": 80,
+          "evidence": "The presentation appears to maintain integrity, but without knowing the total number of slides, it's unclear if all parts are present."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The presentation follows a standard tutorial format, but it's unclear if it conforms to specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 90,
+          "evidence": "The language in the presentation is clear and understandable, with well-defined steps."
+        },
+        "traceability": {
+          "score": 30,
+          "evidence": "The presentation has no clear filename, version, author, or date. The metadata does not provide sufficient provenance."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The credibility of the presentation is uncertain due to the unknown source."
+        },
+        "fitness_for_use": {
+          "score": 40,
+          "evidence": "The presentation has low signal-to-noise ratio for the target AI/business tasks."
+        },
+        "value": {
+          "score": 40,
+          "evidence": "The business value of this document is low for the specified use case, and the risk/cost of ingestion is uncertain due to the unknown source."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation providing step-by-step instructions on how to create a new digital ID for use in editable forms.",
+      "context": "This document is a tutorial on creating a digital signature for use in editable forms. It does not appear to contain business or financial data.",
+      "metadata": {
+        "people": [
+          "No specific people mentioned"
+        ],
+        "organizations": [
+          "No specific organizations mentioned"
+        ],
+        "locations": [
+          "No specific locations mentioned"
+        ],
+        "dates": [
+          "No important dates found"
+        ],
+        "topics": [
+          "Digital signatures",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "New digital ID",
+          "Save to file",
+          "Password creation"
+        ]
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "Python.docx",
+      "status": "success",
+      "processed_at": "2025-12-06T11:29:35.991456Z",
+      "upload_date": "2025-08-01T15:44:52+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 90,
+          "evidence": "The document appears to contain accurate Python code snippets and explanations. However, without executing the code, it is impossible to confirm complete accuracy."
+        },
+        "completeness": {
+          "score": 50,
+          "evidence": "The document covers various Python topics but seems to lack context or a clear structure, making it difficult to determine if it is a comprehensive resource."
+        },
+        "consistency": {
+          "score": 80,
+          "evidence": "The document consistently uses code snippets and examples to illustrate Python concepts, but the formatting and presentation could be improved for better readability."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not contain any information about when it was created or last updated, making it difficult to assess its timeliness."
+        },
+        "validity": {
+          "score": 80,
+          "evidence": "The document uses standard Python syntax and conventions, but some code snippets may not be valid without additional context."
+        },
+        "uniqueness": {
+          "score": 70,
+          "evidence": "The document contains a mix of common Python concepts and unique examples, but it is unclear if the content is original or sourced from other resources."
+        },
+        "reliability": {
+          "score": 60,
+          "evidence": "The document appears to be a reliable source of Python programming information, but the lack of context or clear structure raises concerns about its overall reliability."
+        },
+        "relevance": {
+          "score": 70,
+          "evidence": "The document is relevant to Python programming, but its applicability to specific business purposes is unclear without additional context."
+        },
+        "accessibility": {
+          "score": 80,
+          "evidence": "The document is in DOCX format, which is widely accessible, but code snippets may require additional tools or software to execute."
+        },
+        "precision": {
+          "score": 80,
+          "evidence": "The document provides precise examples and explanations of Python concepts, but the level of detail may not be suitable for all audiences."
+        },
+        "integrity": {
+          "score": 70,
+          "evidence": "The document appears to maintain internal consistency and integrity, but the lack of clear structure or context raises concerns about its overall integrity."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The document conforms to standard Python syntax and conventions, but the presentation and formatting could be improved to better align with best practices."
+        },
+        "interpretability": {
+          "score": 70,
+          "evidence": "The document is generally interpretable, but the lack of clear structure or context may make it difficult for some users to understand."
+        },
+        "traceability": {
+          "score": 50,
+          "evidence": "The document does not provide any information about its origin or version history, making it difficult to assess its traceability."
+        },
+        "credibility": {
+          "score": 60,
+          "evidence": "The document appears to be credible, but the lack of clear authorship or attribution raises concerns about its overall credibility."
+        },
+        "fitness_for_use": {
+          "score": 70,
+          "evidence": "The document is generally fit for use as a Python programming reference, but its applicability to specific business purposes is unclear without additional context."
+        },
+        "value": {
+          "score": 60,
+          "evidence": "The document has potential value for Python programming education or reference, but its overall value is difficult to assess without additional context."
+        }
+      },
+      "document_id": "Python.docx",
+      "document_type": "Technical Documentation",
+      "summary": "A Python programming tutorial document containing code snippets, explanations, and examples of various Python concepts such as data types, operators, functions, control flow, and built-in functions.",
+      "context": "This document appears to be a tutorial or reference guide for Python programming, covering various topics such as data types, operators, functions, control flow, and built-in functions. It contains code snippets and examples to illustrate the concepts.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "Programming",
+          "Data Types",
+          "Operators",
+          "Functions",
+          "Control Flow",
+          "Built-in Functions"
+        ],
+        "key_terms": [
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None",
+          "identifier",
+          "slice operator",
+          "type casting",
+          "type conversion"
+        ]
+      }
+    }
+  ]
+}

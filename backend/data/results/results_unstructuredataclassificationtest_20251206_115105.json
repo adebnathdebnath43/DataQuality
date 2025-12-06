@@ -1,0 +1,109 @@
+{
+  "processed_at": "2025-12-06T11:51:05.688050Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T11:51:05.637691Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 100,
+          "evidence": "The document provides accurate steps to create a digital signature in editable forms. No factual errors detected."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The document appears to cover all steps to create a digital ID, but it's unclear if all relevant slides were extracted."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The document consistently refers to the process and terminology related to creating a digital ID."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "No clear date or version information. Unknown if this is the latest guide for creating a digital ID."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "All instructions and formats provided in the document appear valid and standard."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The document appears unique, providing specific instructions for creating a digital ID."
+        },
+        "reliability": {
+          "score": 70,
+          "evidence": "The source and process are not explicitly stated, but the instructions appear reliable."
+        },
+        "relevance": {
+          "score": 30,
+          "evidence": "The document is not directly relevant to high-stakes business, legal, or financial use cases."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The document is in PPTX format and text was successfully extracted."
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "The steps provided are precise and detailed."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The document appears to maintain integrity, with steps logically following each other."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The document appears to conform to standard tutorial formats, but it's unclear if it follows specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 100,
+          "evidence": "The document is clear and easy to understand, with well-defined steps."
+        },
+        "traceability": {
+          "score": 30,
+          "evidence": "No clear origin, author, or date. The document's provenance is unclear."
+        },
+        "credibility": {
+          "score": 50,
+          "evidence": "The credibility is uncertain without knowing the source or author."
+        },
+        "fitness_for_use": {
+          "score": 30,
+          "evidence": "The document is not directly usable for the intended high-stakes AI/business tasks."
+        },
+        "value": {
+          "score": 30,
+          "evidence": "The document has low business value and unclear risk/cost of ingestion for the specified use case."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document is a tutorial or guide on creating a digital signature for use in editable forms. It does not appear to contain business, financial, or legal data.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Digital Signature",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "Create a new digital ID",
+          "Save to file",
+          "Configure New digital ID"
+        ]
+      }
+    }
+  ]
+}

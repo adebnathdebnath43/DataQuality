@@ -1,0 +1,118 @@
+{
+  "processed_at": "2025-12-06T12:07:26.307639Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:07:26.285419Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document provides instructions on how to create a new digital ID for use in editable forms, including the steps to configure the ID and save it to a file.",
+      "metadata": {
+        "people": [
+          "No specific people mentioned"
+        ],
+        "organizations": [
+          "No specific organizations mentioned"
+        ],
+        "locations": [
+          "No specific locations mentioned"
+        ],
+        "dates": [
+          "No specific dates found"
+        ],
+        "topics": [
+          "Digital signatures",
+          "Editable forms",
+          "Creating a digital ID"
+        ],
+        "key_terms": [
+          "Digital ID",
+          "Editable forms",
+          "Configuration"
+        ]
+      },
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Upload date (S3) 2025-08-01T15:46:58+00:00 is 126 days old (>30 days); timeliness reduced to 50. Content dates found: No specific dates found Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 import io
 import datetime
@@ -109,6 +109,41 @@ class MetadataService:
             print(f"Logging failed: {e}")
         print(msg)
 
+    def _parse_flexible_date(self, value: Any) -> Optional[datetime.datetime]:
+        """Parse common ISO-ish or US-style date strings into datetime."""
+        try:
+            if isinstance(value, datetime.datetime):
+                return value
+            if value is None:
+                return None
+            text = str(value).strip()
+            if not text:
+                return None
+            normalized = text.replace("Z", "+00:00")
+            # Try ISO first
+            try:
+                return datetime.datetime.fromisoformat(normalized)
+            except Exception:
+                pass
+            # Try common formats
+            for fmt in [
+                "%Y-%m-%d",
+                "%Y/%m/%d",
+                "%m/%d/%Y",
+                "%m/%d/%y",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y/%m/%d %H:%M:%S",
+                "%m/%d/%Y %H:%M:%S",
+                "%m/%d/%y %H:%M:%S",
+            ]:
+                try:
+                    return datetime.datetime.strptime(text, fmt)
+                except Exception:
+                    continue
+        except Exception:
+            return None
+        return None
+
     def _validate_dimensions(self, dimensions: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and ensure all 17 dimensions are present with valid scores"""
         required_dimensions = [
@@ -117,12 +152,20 @@ class MetadataService:
             "Integrity", "Conformity", "Interpretability", "Traceability",
             "Credibility", "Fitness_for_Use", "Value"
         ]
+
+        # Map incoming keys case-insensitively to the required names
+        normalized_map = {dim.lower(): dim for dim in required_dimensions}
+        incoming = {}
+        for k, v in (dimensions or {}).items():
+            target = normalized_map.get(str(k).lower())
+            if target:
+                incoming[target] = v
         
         validated = {}
         for dim in required_dimensions:
-            if dim in dimensions and isinstance(dimensions[dim], dict):
-                score = dimensions[dim].get("score", 50)
-                evidence = dimensions[dim].get("evidence", "Not assessed")
+            if dim in incoming and isinstance(incoming[dim], dict):
+                score = incoming[dim].get("score", 50)
+                evidence = incoming[dim].get("evidence", "Not assessed")
                 # Ensure score is valid (0-100)
                 score = max(0, min(100, int(score)))
                 validated[dim] = {"score": score, "evidence": evidence}
@@ -179,6 +222,18 @@ class MetadataService:
                 # Determine file type
                 file_ext = key.split('.')[-1] if '.' in key else ''
                 self._log(f"File extension: {file_ext}")
+
+                # Fetch S3 object metadata for upload date
+                obj_meta = await self.s3_service.get_object_metadata(bucket, key, region, access_key, secret_key, role_arn)
+                upload_dt = obj_meta.get("last_modified")
+                upload_date_iso = upload_dt.isoformat() if upload_dt else None
+                upload_age_days = None
+                if upload_dt:
+                    # Normalize to naive UTC for difference calculation
+                    try:
+                        upload_age_days = (datetime.datetime.utcnow() - upload_dt.replace(tzinfo=None)).days
+                    except Exception as age_err:
+                        self._log(f"Failed to compute upload_age_days for {key}: {str(age_err)}")
                 
                 # 1. Read file content (binary mode)
                 self._log(f"Reading file from S3: {key}")
@@ -280,6 +335,50 @@ Full Content (truncated): {text_content[:2000]}"""
                     # If LLM didn't return dimensions, create defaults
                     self._log("No dimensions in response, using defaults")
                     dimensions = self._validate_dimensions({})
+
+                # Timeliness adjustment using upload dates (S3 + metadata) and content dates
+                content_dates_raw = analysis.get("metadata", {}).get("dates", []) if isinstance(analysis.get("metadata", {}), dict) else []
+                content_dates = []
+                if isinstance(content_dates_raw, list):
+                    # Normalize to strings and keep unique order
+                    seen = set()
+                    for d in content_dates_raw:
+                        s = str(d).strip()
+                        if s and s not in seen:
+                            seen.add(s)
+                            content_dates.append(s)
+
+                # Timeliness based only on S3 upload date (as requested)
+                if upload_age_days is not None:
+                    best_age_days = upload_age_days
+                    best_date_iso = upload_date_iso
+
+                    # Always update the canonical Timeliness dimension (capital T) for consistency
+                    dim_key = "Timeliness"
+                    if "Timeliness" not in dimensions and "timeliness" in dimensions:
+                        dim_key = "timeliness"
+                    timeliness = dimensions.get(dim_key, {"score": 50, "evidence": "Dimension not assessed by LLM"})
+
+                    if best_age_days > 30:
+                        adjusted_score = min(timeliness.get("score", 50), 60)
+                        note_parts = [
+                            f"Upload date (S3) {best_date_iso} is {best_age_days} days old (>30 days); timeliness reduced to {adjusted_score}.",
+                        ]
+                        if content_dates:
+                            note_parts.append(f"Content dates found: {', '.join(content_dates[:3])}{'...' if len(content_dates)>3 else ''}")
+                        existing_evidence = timeliness.get("evidence", "") or "Dimension not assessed by LLM"
+                        timeliness["score"] = adjusted_score
+                        timeliness["evidence"] = " ".join(note_parts + [existing_evidence]).strip()
+                    else:
+                        note_parts = [f"Upload date (S3) {best_date_iso} is {best_age_days} days old (<=30 days); timeliness satisfied."]
+                        if content_dates:
+                            note_parts.append(f"Content dates found: {', '.join(content_dates[:3])}{'...' if len(content_dates)>3 else ''}")
+                        else:
+                            note_parts.append("No explicit content dates found in document.")
+                        existing_evidence = timeliness.get("evidence", "") or "Dimension not assessed by LLM"
+                        timeliness["evidence"] = " ".join(note_parts + [existing_evidence]).strip()
+
+                    dimensions[dim_key] = timeliness
                 
                 # 3.7 Calculate overall quality score from dimensions (average of all 17 dimensions)
                 dimension_values = [dim.get("score", 50) for dim in dimensions.values()]
@@ -292,11 +391,14 @@ Full Content (truncated): {text_content[:2000]}"""
                     "file_name": file_name,
                     "status": "success",
                     "processed_at": datetime.datetime.utcnow().isoformat() + "Z",
+                    "upload_date": upload_date_iso,
+                    "upload_age_days": upload_age_days,
                     "embedding": embedding,
                     "overall_quality_score": overall_quality_score,
                     "recommended_action": recommended_action,
+                    **analysis,
+                    # Ensure our adjusted dimensions override any LLM-provided ones
                     "dimensions": dimensions,
-                    **analysis
                 }
                 
                 # Write individual JSON file
@@ -318,6 +420,8 @@ Full Content (truncated): {text_content[:2000]}"""
                     "file_key": key,
                     "status": "success",
                     "summary": analysis.get("summary", "No summary available"),
+                    "upload_date": upload_date_iso,
+                    "upload_age_days": upload_age_days,
                     "metadata_key": json_key
                 })
                 

@@ -1,0 +1,109 @@
+{
+  "processed_at": "2025-12-06T12:10:25.628172Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:10:25.596475Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation explaining the steps to create a new digital ID for use in editable forms.",
+      "context": "This document provides a step-by-step guide on how to create a new digital ID for use in editable forms. It does not appear to contain financial, legal, or contractual information.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Digital Signature",
+          "Editable forms",
+          "Creating a new digital ID"
+        ],
+        "key_terms": [
+          "Digital ID",
+          "Editable forms"
+        ]
+      },
+      "dimensions": {
+        "Accuracy": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Consistency": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Upload date (S3) 2025-08-01T15:46:58+00:00 is 126 days old (>30 days); timeliness reduced to 50. Dimension not assessed by LLM"
+        },
+        "Validity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Uniqueness": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Reliability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Relevance": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Accessibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Precision": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Integrity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Conformity": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Interpretability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Credibility": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Fitness_for_Use": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        },
+        "Value": {
+          "score": 50,
+          "evidence": "Dimension not assessed by LLM"
+        }
+      }
+    }
+  ]
+}

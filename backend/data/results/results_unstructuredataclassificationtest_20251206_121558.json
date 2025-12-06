@@ -1,0 +1,228 @@
+{
+  "processed_at": "2025-12-06T12:15:58.279653Z",
+  "total_files": 2,
+  "successful": 2,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:15:36.428100Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation detailing the steps to create a new digital ID for use in editable forms.",
+      "context": "This document appears to be a tutorial or guide on creating a digital signature for use in editable forms.",
+      "metadata": {
+        "people": [
+          "Name of the user creating the digital ID"
+        ],
+        "organizations": [],
+        "locations": [
+          "Country of the user creating the digital ID"
+        ],
+        "dates": [],
+        "topics": [
+          "Digital signatures",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "Digital ID",
+          "Signature arrow",
+          "Configure New digital ID"
+        ]
+      },
+      "dimensions": {
+        "Accuracy": {
+          "score": 80,
+          "evidence": "The steps in the presentation appear to be accurate, but without attempting the process, it's difficult to confirm with certainty."
+        },
+        "Completeness": {
+          "score": 70,
+          "evidence": "The presentation seems to cover all steps of creating a digital ID, but the number of slides is unknown."
+        },
+        "Consistency": {
+          "score": 100,
+          "evidence": "The presentation consistently refers to the process of creating a digital ID for editable forms."
+        },
+        "Timeliness": {
+          "score": 50,
+          "evidence": "Upload date (S3) 2025-08-01T15:46:58+00:00 is 126 days old (>30 days); timeliness reduced to 50. Without a date or version number, it's unclear if this is the most recent process for creating a digital ID."
+        },
+        "Validity": {
+          "score": 80,
+          "evidence": "The presentation appears to follow a valid process, but without more context, it's difficult to confirm."
+        },
+        "Uniqueness": {
+          "score": 100,
+          "evidence": "The presentation appears to be unique, as it details a specific process for creating a digital ID."
+        },
+        "Reliability": {
+          "score": 60,
+          "evidence": "The reliability of the source is unknown, as there is no indication of who created the presentation."
+        },
+        "Relevance": {
+          "score": 70,
+          "evidence": "The presentation is relevant to those needing to create a digital ID, but may not be relevant to other users."
+        },
+        "Accessibility": {
+          "score": 80,
+          "evidence": "The presentation is in a standard format (PPTX), but the number of slides is unknown."
+        },
+        "Precision": {
+          "score": 80,
+          "evidence": "The steps in the presentation are precise, but without attempting the process, it's difficult to confirm."
+        },
+        "Integrity": {
+          "score": 80,
+          "evidence": "The presentation appears to maintain integrity, but without more context, it's difficult to confirm."
+        },
+        "Conformity": {
+          "score": 80,
+          "evidence": "The presentation appears to conform to standard practices for creating a digital ID, but without more context, it's difficult to confirm."
+        },
+        "Interpretability": {
+          "score": 80,
+          "evidence": "The presentation is generally clear, but some terms may be unfamiliar to those without technical knowledge."
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "The presentation's origin and version history are unknown."
+        },
+        "Credibility": {
+          "score": 60,
+          "evidence": "The credibility of the source is unknown, as there is no indication of who created the presentation."
+        },
+        "Fitness_for_Use": {
+          "score": 70,
+          "evidence": "The presentation appears to be useful for its intended purpose, but its fitness for other uses is unknown."
+        },
+        "Value": {
+          "score": 70,
+          "evidence": "The presentation has potential value for those needing to create a digital ID, but its value for other users is unknown."
+        }
+      }
+    },
+    {
+      "file_key": "key_terms",
+      "file_name": "Python_123.docx",
+      "status": "success",
+      "processed_at": "2025-12-06T12:15:58.268045Z",
+      "upload_date": "2025-12-02T00:16:57+00:00",
+      "upload_age_days": 4,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "document_id": "Python_123.docx",
+      "document_type": "Technical Documentation",
+      "summary": "The document contains Python code snippets and explanations for various concepts such as data types, operators, functions, control flow, and built-in functions.",
+      "context": "This document appears to be a Python tutorial or reference guide, covering basic programming concepts and Python-specific features.",
+      "metadata": {
+        "people": [],
+        "organizations": [],
+        "locations": [],
+        "dates": [],
+        "topics": [
+          "Python",
+          "programming",
+          "data types",
+          "operators",
+          "functions",
+          "control flow"
+        ],
+        "key_terms": [
+          "int",
+          "float",
+          "complex",
+          "bool",
+          "str",
+          "bytes",
+          "bytearray",
+          "range",
+          "list",
+          "tuple",
+          "set",
+          "frozenset",
+          "dict",
+          "None"
+        ]
+      },
+      "dimensions": {
+        "Accuracy": {
+          "score": 90,
+          "evidence": "The Python code snippets and explanations appear to be accurate, but some minor errors (e.g., indentation, syntax) may be present."
+        },
+        "Completeness": {
+          "score": 50,
+          "evidence": "The document covers basic Python concepts, but it is unclear if it is a complete resource for learning Python or if it is missing some sections."
+        },
+        "Consistency": {
+          "score": 80,
+          "evidence": "The formatting and presentation of the code snippets and explanations are mostly consistent, but there are some variations in indentation and spacing."
+        },
+        "Timeliness": {
+          "score": 80,
+          "evidence": "Upload date (S3) 2025-12-02T00:16:57+00:00 is 4 days old (<=30 days); timeliness satisfied. No explicit content dates found in document. The document does not contain any dates or explicit references to Python versions, but the content appears to be relevant for recent Python versions."
+        },
+        "Validity": {
+          "score": 90,
+          "evidence": "The code snippets and explanations follow proper syntax and formatting conventions, but some examples may not be the best practices for production code."
+        },
+        "Uniqueness": {
+          "score": 80,
+          "evidence": "The content appears to be unique, but some examples and explanations may be similar to those found in other Python tutorials or resources."
+        },
+        "Reliability": {
+          "score": 70,
+          "evidence": "The source and process for creating the document are unknown, but the content appears to be reliable for learning Python basics."
+        },
+        "Relevance": {
+          "score": 60,
+          "evidence": "The document is relevant for learning Python, but its usefulness for the intended business purpose (e.g., AI, legal, financial) is unclear."
+        },
+        "Accessibility": {
+          "score": 100,
+          "evidence": "The document is in DOCX format and can be easily opened, read, and parsed using standard tools."
+        },
+        "Precision": {
+          "score": 80,
+          "evidence": "The document provides clear and concise explanations for most Python concepts, but some examples may be overly simplified or lack real-world context."
+        },
+        "Integrity": {
+          "score": 90,
+          "evidence": "The document appears to be self-contained and does not rely on external references or resources, but some code snippets may be incomplete or require additional context."
+        },
+        "Conformity": {
+          "score": 80,
+          "evidence": "The document follows common conventions for presenting code snippets and explanations, but it is unclear if it adheres to specific organizational or industry standards."
+        },
+        "Interpretability": {
+          "score": 80,
+          "evidence": "The document uses clear language and provides explanations for technical terms, but some Python concepts may be difficult to understand for beginners."
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "The document does not provide any information about its origin, author, or version history."
+        },
+        "Credibility": {
+          "score": 70,
+          "evidence": "The document appears to be credible, but its source and author are unknown, and it does not contain any references or citations."
+        },
+        "Fitness_for_Use": {
+          "score": 60,
+          "evidence": "The document is useful for learning Python basics, but its relevance and applicability to the intended business tasks are unclear."
+        },
+        "Value": {
+          "score": 60,
+          "evidence": "The document has some value for learning Python, but its potential business benefit and ROI are uncertain."
+        }
+      }
+    }
+  ]
+}

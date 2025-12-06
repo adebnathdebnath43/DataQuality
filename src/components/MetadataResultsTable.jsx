@@ -195,6 +195,7 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
                         <tr>
                             <th className="expand-col"></th>
                             <th>File Name</th>
+                            <th>Upload Date</th>
                             <th>Document Type</th>
                             {metadataFields.map(field => (
                                 <th key={field}>{formatFieldName(field)}</th>
@@ -233,6 +234,14 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
                                         )}
                                     </td>
                                     <td className="file-name" title={file.file_name}>{file.file_name}</td>
+                                    <td title={file.upload_date || '-'}>
+                                        {file.upload_date ? new Date(file.upload_date).toLocaleString() : '-'}
+                                        {typeof file.upload_age_days === 'number' && (
+                                            <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                                                {file.upload_age_days} days ago
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{file.document_type || '-'}</td>
                                     {metadataFields.map(field => (
                                         <td key={field}>{renderMetadataCell(file.metadata, field)}</td>

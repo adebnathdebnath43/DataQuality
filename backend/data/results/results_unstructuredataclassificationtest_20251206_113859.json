@@ -1,0 +1,16 @@
+{
+  "processed_at": "2025-12-06T11:38:59.618597Z",
+  "total_files": 1,
+  "successful": 0,
+  "failed": 1,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "Digital Signature in Editable forms .pptx",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "error",
+      "error": "unsupported operand type(s) for |: 'type' and 'NoneType'",
+      "processed_at": "2025-12-06T11:38:59.605453Z"
+    }
+  ]
+}

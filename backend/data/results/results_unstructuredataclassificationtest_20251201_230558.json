@@ -84,6 +84,38 @@
               "new_evidence": "The document does not provide any information about relationships or constraints. It is a step-by-step guide on how to create a digital signature, but it does not mention any relationship with other data or constraints that need to be preserved."
             }
           ]
+        },
+        "timeliness": {
+          "status": "reanalyzed",
+          "feedback": "check the document upload date and reassess",
+          "timestamp": "2025-12-06T11:30:59.187712+00:00",
+          "history": [
+            {
+              "timestamp": "2025-12-06T11:30:59.187712+00:00",
+              "action": "reanalyzed",
+              "feedback": "check the document upload date and reassess",
+              "old_score": 0,
+              "old_evidence": "",
+              "new_score": 50,
+              "new_evidence": "The document does not contain a document upload date or any clear execution date. Therefore, it cannot be confirmed if it is the final/executed/latest version or an old draft."
+            }
+          ]
+        },
+        "Traceability": {
+          "status": "reanalyzed",
+          "feedback": "check for the information who this document information is collected.",
+          "timestamp": "2025-12-06T12:14:55.882883+00:00",
+          "history": [
+            {
+              "timestamp": "2025-12-06T12:14:55.882883+00:00",
+              "action": "reanalyzed",
+              "feedback": "check for the information who this document information is collected.",
+              "old_score": 0,
+              "old_evidence": "",
+              "new_score": 50,
+              "new_evidence": "The document does not provide clear information on who collected the information or its version history. The file name 'Digital Signature in Editable forms .pptx' does not include a version number, author, or date."
+            }
+          ]
         }
       },
       "dimensions": {
@@ -98,9 +130,17 @@
         "integrity": {
           "score": 50,
           "evidence": "The document does not provide any information about relationships or constraints. It is a step-by-step guide on how to create a digital signature, but it does not mention any relationship with other data or constraints that need to be preserved."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The document does not contain a document upload date or any clear execution date. Therefore, it cannot be confirmed if it is the final/executed/latest version or an old draft."
+        },
+        "Traceability": {
+          "score": 50,
+          "evidence": "The document does not provide clear information on who collected the information or its version history. The file name 'Digital Signature in Editable forms .pptx' does not include a version number, author, or date."
         }
       },
-      "overall_quality_score": 58.333333333333336
+      "overall_quality_score": 55.0
     }
   ]
 }

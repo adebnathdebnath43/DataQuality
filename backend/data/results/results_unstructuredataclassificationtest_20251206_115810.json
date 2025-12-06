@@ -1,0 +1,112 @@
+{
+  "processed_at": "2025-12-06T11:58:10.830834Z",
+  "total_files": 1,
+  "successful": 1,
+  "failed": 0,
+  "model_used": "mistral.mistral-large-2402-v1:0",
+  "files": [
+    {
+      "file_key": "key_terms",
+      "file_name": "Digital Signature in Editable forms .pptx",
+      "status": "success",
+      "processed_at": "2025-12-06T11:58:10.817583Z",
+      "upload_date": "2025-08-01T15:46:58+00:00",
+      "upload_age_days": 126,
+      "embedding": [],
+      "overall_quality_score": 60,
+      "recommended_action": "REVIEW",
+      "dimensions": {
+        "accuracy": {
+          "score": 100,
+          "evidence": "The steps provided in the presentation are accurate for creating a new digital ID."
+        },
+        "completeness": {
+          "score": 70,
+          "evidence": "The presentation is missing information about the purpose and importance of digital signatures."
+        },
+        "consistency": {
+          "score": 100,
+          "evidence": "The presentation is consistent in its formatting and language."
+        },
+        "timeliness": {
+          "score": 50,
+          "evidence": "The timeliness of the document cannot be determined without knowing when it was created or last updated."
+        },
+        "validity": {
+          "score": 100,
+          "evidence": "The information provided in the presentation is valid and follows standard procedures for creating a digital ID."
+        },
+        "uniqueness": {
+          "score": 100,
+          "evidence": "The presentation appears to be unique, providing specific steps for creating a digital ID."
+        },
+        "reliability": {
+          "score": 70,
+          "evidence": "The reliability of the source cannot be determined without additional information."
+        },
+        "relevance": {
+          "score": 50,
+          "evidence": "The document is not directly relevant to the specified use case (high-stakes RAG, LLM fine-tuning, legal/financial/compliance automation)."
+        },
+        "accessibility": {
+          "score": 100,
+          "evidence": "The presentation is in a standard format (PPTX) and can be easily accessed and parsed."
+        },
+        "precision": {
+          "score": 100,
+          "evidence": "The steps provided in the presentation are precise and detailed."
+        },
+        "integrity": {
+          "score": 100,
+          "evidence": "The presentation appears to be intact with no broken references or missing elements."
+        },
+        "conformity": {
+          "score": 80,
+          "evidence": "The presentation follows a standard format but does not conform to any specific organizational or industry standards."
+        },
+        "interpretability": {
+          "score": 90,
+          "evidence": "The presentation is clear and easy to understand, but could benefit from more context or explanation."
+        },
+        "traceability": {
+          "score": 50,
+          "evidence": "The provenance of the document cannot be determined without additional information."
+        },
+        "credibility": {
+          "score": 70,
+          "evidence": "The credibility of the source cannot be determined without additional information."
+        },
+        "fitness_for_use": {
+          "score": 50,
+          "evidence": "The document does not appear to be directly usable for the specified business tasks."
+        },
+        "value": {
+          "score": 60,
+          "evidence": "The document may have some value for understanding digital signatures, but its relevance and risk/cost of ingestion for the specified use case are low."
+        }
+      },
+      "document_id": "Digital Signature in Editable forms .pptx",
+      "document_type": "Presentation",
+      "summary": "A presentation outlining the steps to create a new digital ID for use in editable forms.",
+      "context": "This document appears to be a tutorial or guide on creating a digital signature for use in editable forms. It does not seem to contain financial, legal, or contractual information.",
+      "metadata": {
+        "people": [
+          "Name of the user creating the digital ID"
+        ],
+        "organizations": [],
+        "locations": [
+          "Country of the user"
+        ],
+        "dates": [],
+        "topics": [
+          "Digital signatures",
+          "Editable forms"
+        ],
+        "key_terms": [
+          "Digital ID",
+          "Editable forms"
+        ]
+      }
+    }
+  ]
+}

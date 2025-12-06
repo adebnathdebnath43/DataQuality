@@ -146,14 +146,20 @@ const SourceDetails = () => {
         setError(null);
         setQualityCheckResults(null); // Clear previous results
 
+        let progressInterval;
         try {
             const accessKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.accessKey : undefined;
             const secretKey = (source.authMethod === 'keys' || source.authMethod === 'assume_role') ? source.secretKey : undefined;
             const roleArn = source.authMethod === 'assume_role' ? source.roleArn : undefined;
 
-            const keysToProcess = Array.from(selectedItems);
+            const keysToProcess = Array.from(selectedItems).filter(k => !k.endsWith('/'));
+            if (keysToProcess.length === 0) {
+                setError('Please select at least one file (folders are ignored).');
+                return;
+            }
 
-            const progressInterval = setInterval(() => {
+            // Drive progress to 90% while request runs; ensure cleanup on all paths
+            progressInterval = setInterval(() => {
                 setScanProgress(prev => Math.min(prev + 5, 90));
             }, 500);
 
@@ -170,24 +176,16 @@ const SourceDetails = () => {
 
             console.log('[Quality Check] Result:', result);
 
-            clearInterval(progressInterval);
             setScanProgress(100);
 
-            // Use the results directly from the response
-            // The backend now returns a list of results, and we can construct the display object from it
-            if (result.results && result.results.length > 0) {
-                // Check if we have a consolidated object (backward compatibility)
+            if (result?.results?.length > 0) {
                 if (result.results[0].consolidated_json) {
                     const consolidatedData = result.results[0].consolidated_json;
                     setQualityCheckResults(consolidatedData);
                     localStorage.setItem(`qualityCheckResults_${id}`, JSON.stringify(consolidatedData));
-                } else {
-                    // Construct display object from results list if consolidated is missing
-                    // This handles the case where we might have removed consolidated logic
-                    // But for now, let's rely on the backend returning what we need or just showing the first result
-                    // Actually, the backend still returns the list of results.
-                    // Let's just reload files to see the new JSONs
                 }
+            } else {
+                setError('Quality check completed but returned no results.');
             }
 
             await loadFiles();
@@ -197,6 +195,7 @@ const SourceDetails = () => {
             console.error('[Quality Check] Error:', err);
             setError('Failed to run quality check: ' + (err.response?.data?.detail || err.message));
         } finally {
+            if (progressInterval) clearInterval(progressInterval);
             setIsScanning(false);
             setScanProgress(0);
         }

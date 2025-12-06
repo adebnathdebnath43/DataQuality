@@ -40,11 +40,12 @@ class BedrockService:
 
         return self._default_client
 
-    def list_models(self, region: str = None, access_key: str = None, secret_key: str = None) -> List[Dict[str, str]]:
-        """List available Bedrock foundation models"""
-        # Create bedrock client (not bedrock-runtime)
+    def list_models(self, region: str = None, access_key: str = None, secret_key: str = None) -> Dict[str, Any]:
+        """List available Bedrock foundation models. Returns {'models': [...], 'warning': optional} for UI."""
         region = region or self.region_name
-        
+        warning = None
+
+        # Create bedrock client (not bedrock-runtime)
         if access_key and secret_key:
             client = boto3.client(
                 'bedrock',
@@ -58,37 +59,38 @@ class BedrockService:
         try:
             response = client.list_foundation_models()
             models = []
-            
             for model in response.get('modelSummaries', []):
-                # Filter for text generation models
                 if 'TEXT' in model.get('outputModalities', []):
                     models.append({
                         'model_id': model['modelId'],
                         'model_name': model['modelName'],
                         'provider': model['providerName']
                     })
-            
-            return models
+            return {"models": models}
         except Exception as e:
-            print(f"Error listing Bedrock models: {str(e)}")
-            # Return default models if API fails
-            return [
-                {
-                    'model_id': 'anthropic.claude-3-sonnet-20240229-v1:0',
-                    'model_name': 'Claude 3 Sonnet',
-                    'provider': 'Anthropic'
-                },
-                {
-                    'model_id': 'anthropic.claude-3-haiku-20240307-v1:0',
-                    'model_name': 'Claude 3 Haiku',
-                    'provider': 'Anthropic'
-                },
-                {
-                    'model_id': 'mistral.mistral-large-2402-v1:0',
-                    'model_name': 'Mistral Large',
-                    'provider': 'Mistral AI'
-                }
-            ]
+            warning = str(e)
+            print(f"Error listing Bedrock models: {warning}")
+            # Return default models with warning so UI can surface the issue
+            return {
+                "models": [
+                    {
+                        'model_id': 'anthropic.claude-3-sonnet-20240229-v1:0',
+                        'model_name': 'Claude 3 Sonnet',
+                        'provider': 'Anthropic'
+                    },
+                    {
+                        'model_id': 'anthropic.claude-3-haiku-20240307-v1:0',
+                        'model_name': 'Claude 3 Haiku',
+                        'provider': 'Anthropic'
+                    },
+                    {
+                        'model_id': 'mistral.mistral-large-2402-v1:0',
+                        'model_name': 'Mistral Large',
+                        'provider': 'Mistral AI'
+                    }
+                ],
+                "warning": warning
+            }
 
     def analyze_content(self, content: str, file_name: str, model_id: str = None, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, additional_prompt: str = "") -> Dict[str, Any]:
         """
@@ -344,11 +346,20 @@ Return ONLY the JSON above. Begin immediately.
                     "accuracy", "completeness", "consistency", "timeliness", "validity",
                     "uniqueness", "reliability", "relevance", "accessibility", "precision",
                     "integrity", "conformity", "interpretability", "traceability",
-                    "fitness_for_use", "value"
+                    "credibility", "fitness_for_use", "value"
                 ]
 
+                # Fetch dimensions dict case-insensitively
+                dims = {}
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        if str(k).lower() == "dimensions" and isinstance(v, dict):
+                            dims = v
+                            break
+                    if not dims and isinstance(obj.get("dimensions"), dict):
+                        dims = obj.get("dimensions", {})
+
                 # Normalize key format (handle spaces vs underscores, case-insensitive)
-                dims = obj.get("dimensions", {}) if isinstance(obj, dict) else {}
                 normalized = {}
                 for k, v in (dims.items() if isinstance(dims, dict) else []):
                     key = k.strip().lower().replace(" ", "_")
