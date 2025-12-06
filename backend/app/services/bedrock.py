@@ -414,11 +414,11 @@ Return ONLY the JSON above. Begin immediately.
 
     def get_embedding(self, text: str, region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None) -> List[float]:
         """
-        Generate embedding for text using Titan Embeddings v1.
+        Generate embedding for text using Titan Embeddings v2 (model id amazon.titan-embed-text-v2:0).
         """
         try:
             client = self._get_client(region, access_key, secret_key, role_arn)
-            model_id = "amazon.titan-embed-text-v1"
+            model_id = "amazon.titan-embed-text-v2:0"
             
             # Truncate text if too long (Titan has input limit)
             max_chars = 8000
@@ -432,12 +432,18 @@ Return ONLY the JSON above. Begin immediately.
             
             response = client.invoke_model(
                 modelId=model_id,
-                body=body
+                body=body,
+                contentType="application/json",
+                accept="application/json"
             )
             
             response_body = json.loads(response['body'].read())
             embedding = response_body.get('embedding', [])
-            print(f"[DEBUG] Embedding generated successfully. Length: {len(embedding)}")
+            status_code = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+            if not embedding:
+                print(f"[WARN] Empty embedding from Titan v2. Status: {status_code}, body keys: {list(response_body.keys())}")
+            else:
+                print(f"[DEBUG] Embedding generated successfully. Length: {len(embedding)}")
             return embedding
             
         except Exception as e:

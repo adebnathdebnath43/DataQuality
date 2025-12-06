@@ -206,6 +206,38 @@ class MetadataService:
         duplicates.sort(key=lambda x: x['similarity'], reverse=True)
         return duplicates
 
+    def _metadata_similarity(self, doc_type1: str, doc_type2: str, topics1: Any, topics2: Any, key_terms1: Any, key_terms2: Any) -> float:
+        """Combined similarity on doc type (exact match) and Jaccard over topics/key terms."""
+        try:
+            import re
+
+            def tokenize_list(value: Any) -> set:
+                if isinstance(value, list):
+                    items = value
+                elif value is None:
+                    items = []
+                else:
+                    items = [value]
+                text = " ".join([str(x) for x in items]).lower()
+                return set([t for t in re.split(r"\W+", text) if t])
+
+            doc_type_score = 1.0 if (doc_type1 or "").strip().lower() == (doc_type2 or "").strip().lower() and doc_type1 else 0.0
+            s1 = tokenize_list(topics1) | tokenize_list(key_terms1)
+            s2 = tokenize_list(topics2) | tokenize_list(key_terms2)
+
+            if not s1 or not s2:
+                jaccard = 0.0
+            else:
+                inter = len(s1 & s2)
+                union = len(s1 | s2)
+                jaccard = inter / union if union else 0.0
+
+            # Weighted blend: doc type 0.5, topics/key terms 0.5
+            return 0.5 * doc_type_score + 0.5 * jaccard
+        except Exception as e:
+            self._log(f"Metadata similarity failed: {str(e)}")
+            return 0.0
+
     async def process_files(self, bucket: str, file_keys: List[str], region: str = None, access_key: str = None, secret_key: str = None, role_arn: str = None, model_id: str = None) -> List[Dict[str, Any]]:
         self._log(f"Processing {len(file_keys)} files from bucket {bucket}")
         results = []
@@ -448,55 +480,137 @@ Full Content (truncated): {text_content[:2000]}"""
         self._log("=" * 80)
         self._log("STARTING COSINE SIMILARITY CALCULATIONS FOR DUPLICATE DETECTION")
         self._log("=" * 80)
-        successful_files = [f for f in file_analyses if f.get("status") == "success" and f.get("embedding")]
-        
-        self._log(f"Files with embeddings: {len(successful_files)} out of {len(file_analyses)} total files")
-        
+        successful_files = [f for f in file_analyses if f.get("status") == "success"]
+        self._log(f"Files eligible for duplicate check: {len(successful_files)}")
+
         if len(successful_files) < 2:
-            self._log("Not enough files with embeddings to calculate similarity. Need at least 2 files.")
+            self._log("Not enough files to calculate similarity. Need at least 2 files.")
         else:
             total_comparisons = 0
             duplicates_found = 0
-            
+            similarity_pairs = []  # track all meta-gated pairs with their cosine for UI
+
+            # Cache summary embeddings to avoid repeated Titan calls
+            for f in successful_files:
+                f["summary_embedding"] = []
+
             for i, file1 in enumerate(successful_files):
                 potential_duplicates = []
-                embedding1 = file1.get("embedding", [])
-                
-                if not embedding1 or len(embedding1) == 0:
-                    self._log(f"Skipping {file1.get('file_name')} - empty embedding")
-                    continue
-                
+                meta1 = file1.get("metadata", {})
+                summary1 = file1.get("summary", "")
+
                 for j, file2 in enumerate(successful_files):
-                    if i == j:  # Skip comparing with itself
+                    if i >= j:  # Skip self and already compared pairs
                         continue
-                    
-                    embedding2 = file2.get("embedding", [])
-                    if not embedding2 or len(embedding2) == 0:
-                        continue
-                    
-                    # Calculate cosine similarity
-                    similarity = self._cosine_similarity(embedding1, embedding2)
+
+                    meta2 = file2.get("metadata", {})
+                    meta_sim = self._metadata_similarity(
+                        file1.get("document_type"),
+                        file2.get("document_type"),
+                        (meta1 or {}).get("topics"),
+                        (meta2 or {}).get("topics"),
+                        (meta1 or {}).get("key_terms"),
+                        (meta2 or {}).get("key_terms"),
+                    )
                     total_comparisons += 1
-                    
-                    self._log(f"Comparing: {file1.get('file_name')} <-> {file2.get('file_name')}: {round(similarity * 100, 2)}%")
-                    
-                    # Flag as potential duplicate if similarity > 95%
-                    if similarity > 0.95:
+
+                    self._log(f"Metadata similarity {file1.get('file_name')} <-> {file2.get('file_name')}: {round(meta_sim*100,2)}%")
+
+                    # Only proceed to embedding check if metadata is close
+                    if meta_sim < 0.7:
+                        continue
+
+                    # Prefer full-document embedding for duplicate check; fall back to summary if missing.
+                    emb1 = file1.get("embedding", [])
+                    emb2 = file2.get("embedding", [])
+
+                    # If comprehensive embeddings are missing (e.g., Titan empty), try summary embeddings as fallback
+                    if (not emb1 or not emb2):
+                        try:
+                            if not file1.get("summary_embedding") and summary1:
+                                file1["summary_embedding"] = self.bedrock_service.get_embedding(
+                                    text=summary1,
+                                    region=region,
+                                    access_key=access_key,
+                                    secret_key=secret_key,
+                                    role_arn=role_arn
+                                ) or []
+                            if not file2.get("summary_embedding") and file2.get("summary"):
+                                file2["summary_embedding"] = self.bedrock_service.get_embedding(
+                                    text=file2.get("summary"),
+                                    region=region,
+                                    access_key=access_key,
+                                    secret_key=secret_key,
+                                    role_arn=role_arn
+                                ) or []
+                        except Exception as embed_err:
+                            self._log(f"Summary embedding failed: {str(embed_err)}")
+
+                        emb1 = emb1 or file1.get("summary_embedding", [])
+                        emb2 = emb2 or file2.get("summary_embedding", [])
+
+                    # Fallback: bag-of-words embedding if Bedrock embeddings are empty
+                    if (not emb1 or not emb2):
+                        import re
+                        from collections import Counter
+
+                        def bow_counts(text: str) -> Counter:
+                            tokens = [t for t in re.split(r"\W+", text.lower()) if t]
+                            return Counter(tokens)
+
+                        c1 = bow_counts(summary1 or file1.get("context", ""))
+                        c2 = bow_counts(file2.get("summary", "") or file2.get("context", ""))
+
+                        vocab = sorted(set(c1.keys()) | set(c2.keys()))
+                        if vocab:
+                            # Align vocab across both vectors to ensure cosine works
+                            emb1 = emb1 or [c1.get(k, 0) for k in vocab]
+                            emb2 = emb2 or [c2.get(k, 0) for k in vocab]
+
+                    if not emb1 or not emb2:
+                        self._log(f"Skipping pair due to missing embeddings: {file1.get('file_name')} / {file2.get('file_name')}")
+                        continue
+
+                    similarity = self._cosine_similarity(emb1, emb2)
+                    self._log(f"Summary cosine {file1.get('file_name')} <-> {file2.get('file_name')}: {round(similarity*100,2)}%")
+
+                    similarity_pairs.append({
+                        "file_1": file1.get("file_name"),
+                        "file_2": file2.get("file_name"),
+                        "similarity": round(similarity * 100, 2),
+                        "metadata_similarity": round(meta_sim * 100, 2)
+                    })
+
+                    if similarity >= 0.95:
                         duplicates_found += 1
-                        potential_duplicates.append({
+                        entry = {
                             "file_name": file2.get("file_name"),
                             "file_key": file2.get("file_key"),
-                            "similarity": round(similarity * 100, 2)  # Convert to percentage
+                            "similarity": round(similarity * 100, 2),
+                            "metadata_similarity": round(meta_sim * 100, 2)
+                        }
+                        potential_duplicates.append(entry)
+                        # Symmetric add to file2 as well
+                        other_list = file2.get("potential_duplicates", [])
+                        other_list.append({
+                            "file_name": file1.get("file_name"),
+                            "file_key": file1.get("file_key"),
+                            "similarity": round(similarity * 100, 2),
+                            "metadata_similarity": round(meta_sim * 100, 2)
                         })
+                        file2["potential_duplicates"] = other_list
                         self._log(f"⚠️  DUPLICATE DETECTED: {file1.get('file_name')} <-> {file2.get('file_name')} ({round(similarity * 100, 2)}%)")
-                
-                # Sort by similarity (highest first) and add to file analysis
+
                 if potential_duplicates:
                     potential_duplicates.sort(key=lambda x: x["similarity"], reverse=True)
                     file1["potential_duplicates"] = potential_duplicates
                     self._log(f"File '{file1.get('file_name')}' has {len(potential_duplicates)} potential duplicate(s)")
-            
+
             self._log(f"Duplicate detection complete. Total comparisons: {total_comparisons}, Duplicates found: {duplicates_found}")
+            # Attach all similarity pairs for UI transparency
+            similarity_pairs.sort(key=lambda x: x.get("similarity", 0), reverse=True)
+            for f in file_analyses:
+                f["similarity_pairs"] = similarity_pairs
         
         self._log("=" * 80)
         
@@ -512,6 +626,33 @@ Full Content (truncated): {text_content[:2000]}"""
             "model_used": model_id,
             "files": file_analyses
         }
+
+        # Add a flat list of duplicate pairs for easy UI display
+        duplicate_pairs = []
+        seen_pairs = set()
+        for f in file_analyses:
+            for dup in f.get("potential_duplicates", []) or []:
+                a = f.get("file_name")
+                b = dup.get("file_name")
+                if not a or not b:
+                    continue
+                key = tuple(sorted([a, b]))
+                if key in seen_pairs:
+                    continue
+                seen_pairs.add(key)
+                duplicate_pairs.append({
+                    "file_1": a,
+                    "file_2": b,
+                    "similarity": dup.get("similarity"),
+                    "metadata_similarity": dup.get("metadata_similarity")
+                })
+
+        duplicate_pairs.sort(key=lambda x: x.get("similarity", 0), reverse=True)
+        consolidated_json["duplicate_pairs"] = duplicate_pairs
+
+        # Add full similarity pairs list for UI when many files are selected
+        if 'similarity_pairs' in locals():
+            consolidated_json["similarity_pairs"] = similarity_pairs
         
         # Save consolidated JSON to S3 in output_folder
         timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
