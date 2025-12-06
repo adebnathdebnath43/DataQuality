@@ -516,9 +516,7 @@ Full Content (truncated): {text_content[:2000]}"""
 
                     self._log(f"Metadata similarity {file1.get('file_name')} <-> {file2.get('file_name')}: {round(meta_sim*100,2)}%")
 
-                    # Only proceed to embedding check if metadata is close
-                    if meta_sim < 0.7:
-                        continue
+                    meta_gate_ok = meta_sim >= 0.7
 
                     # Prefer full-document embedding for duplicate check; fall back to summary if missing.
                     emb1 = file1.get("embedding", [])
@@ -572,7 +570,7 @@ Full Content (truncated): {text_content[:2000]}"""
                         continue
 
                     similarity = self._cosine_similarity(emb1, emb2)
-                    self._log(f"Summary cosine {file1.get('file_name')} <-> {file2.get('file_name')}: {round(similarity*100,2)}%")
+                    self._log(f"Summary cosine {file1.get('file_name')} <-> {file2.get('file_name')}: {round(similarity*100,2)}% (meta {round(meta_sim*100,2)}%)")
 
                     similarity_pairs.append({
                         "file_1": file1.get("file_name"),
@@ -581,7 +579,7 @@ Full Content (truncated): {text_content[:2000]}"""
                         "metadata_similarity": round(meta_sim * 100, 2)
                     })
 
-                    if similarity >= 0.95:
+                    if meta_gate_ok and similarity >= 0.95:
                         duplicates_found += 1
                         entry = {
                             "file_name": file2.get("file_name"),
@@ -611,6 +609,9 @@ Full Content (truncated): {text_content[:2000]}"""
             similarity_pairs.sort(key=lambda x: x.get("similarity", 0), reverse=True)
             for f in file_analyses:
                 f["similarity_pairs"] = similarity_pairs
+            # Also attach to lightweight results list so UI can read without consolidated_json
+            for r in results:
+                r["similarity_pairs"] = similarity_pairs
         
         self._log("=" * 80)
         
@@ -653,6 +654,10 @@ Full Content (truncated): {text_content[:2000]}"""
         # Add full similarity pairs list for UI when many files are selected
         if 'similarity_pairs' in locals():
             consolidated_json["similarity_pairs"] = similarity_pairs
+
+        # Mirror summary pairs onto first result for backward compatibility with UI
+        if results:
+            results[0]["similarity_pairs"] = similarity_pairs
         
         # Save consolidated JSON to S3 in output_folder
         timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")

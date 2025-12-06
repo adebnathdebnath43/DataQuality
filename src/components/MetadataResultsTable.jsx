@@ -50,6 +50,36 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
 
     const metadataFields = getAllMetadataFields();
 
+    // Pull similarity pairs from file-level first, then table-level fallback
+    const getAllSimilarityPairs = () => {
+        if (localResults?.similarity_pairs?.length) return localResults.similarity_pairs;
+        if (results?.similarity_pairs?.length) return results.similarity_pairs;
+        return [];
+    };
+
+    // Return top-N similarity badges for a file even when metadata gate blocks duplicates
+    const getTopSimilarities = (file, limit = 3) => {
+        if (!file) return [];
+
+        if (file.potential_duplicates?.length) {
+            return file.potential_duplicates.slice(0, limit);
+        }
+
+        const pairs = file.similarity_pairs?.length ? file.similarity_pairs : getAllSimilarityPairs();
+        if (!pairs || pairs.length === 0) return [];
+
+        const related = pairs
+            .filter(p => p.file_1 === file.file_name || p.file_2 === file.file_name)
+            .map(p => ({
+                file_name: p.file_1 === file.file_name ? p.file_2 : p.file_1,
+                similarity: p.similarity,
+                metadata_similarity: p.metadata_similarity
+            }))
+            .sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+
+        return related.slice(0, limit);
+    };
+
     // Icon mapping for common metadata fields
     const getFieldIcon = (field) => {
         const iconMap = {
@@ -264,30 +294,53 @@ const MetadataResultsTable = ({ results, connectionConfig, onResultsChange }) =>
                                         )}
                                     </td>
                                     <td>
-                                        {file.potential_duplicates && file.potential_duplicates.length > 0 ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                                {file.potential_duplicates.slice(0, 3).map((dup, idx) => (
-                                                    <span key={idx} style={{
-                                                        background: dup.similarity >= 99 ? '#dc2626' : dup.similarity >= 97 ? '#ea580c' : '#f59e0b',
-                                                        color: 'white',
-                                                        padding: '0.15rem 0.5rem',
-                                                        borderRadius: '8px',
-                                                        fontSize: '0.75rem',
-                                                        fontWeight: 'bold',
-                                                        textAlign: 'center'
-                                                    }}>
-                                                        {dup.similarity}%
-                                                    </span>
-                                                ))}
-                                                {file.potential_duplicates.length > 3 && (
-                                                    <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
-                                                        +{file.potential_duplicates.length - 3} more
-                                                    </span>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <span style={{ color: '#6b7280' }}>-</span>
-                                        )}
+                                        {(() => {
+                                            const topSimilar = getTopSimilarities(file, 3);
+                                            const badgeColor = (score) => {
+                                                if (score >= 99) return { bg: '#0f172a', border: '#38bdf8' };
+                                                if (score >= 97) return { bg: '#0f172a', border: '#22c55e' };
+                                                if (score >= 95) return { bg: '#0f172a', border: '#eab308' };
+                                                return { bg: '#111827', border: '#6b7280' };
+                                            };
+                                            return topSimilar.length > 0 ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                                    {topSimilar.map((dup, idx) => {
+                                                        const colors = badgeColor(dup.similarity || 0);
+                                                        return (
+                                                            <div key={idx} style={{
+                                                                background: colors.bg,
+                                                                border: `1px solid ${colors.border}`,
+                                                                color: '#e5e7eb',
+                                                                padding: '0.35rem 0.5rem',
+                                                                borderRadius: '10px',
+                                                                fontSize: '0.78rem',
+                                                                lineHeight: 1.35,
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                gap: '0.5rem'
+                                                            }}>
+                                                                <div style={{ maxWidth: '11rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={dup.file_name}>
+                                                                    {dup.file_name || 'other file'}
+                                                                </div>
+                                                                <div style={{ textAlign: 'right' }}>
+                                                                    <div style={{ fontWeight: '700', color: '#f8fafc' }}>{dup.similarity}%</div>
+                                                                    {typeof dup.metadata_similarity === 'number' && (
+                                                                        <div style={{ fontSize: '0.68rem', color: '#cbd5e1' }}>meta {dup.metadata_similarity}%</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {(file.potential_duplicates?.length || 0) > 3 && (
+                                                        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+                                                            +{file.potential_duplicates.length - 3} more
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: '#6b7280' }}>-</span>
+                                            );
+                                        })()}
                                     </td>
                                     <td>
                                         <span className={`status-badge ${file.status}`}>
